@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { auth, provider } from "@/lib/firebase"
 import { signInWithPopup, signOut } from "firebase/auth"
 import { Button } from "@/components/ui/button"
+export const dynamic = 'force-dynamic'
 
 export default function LoginForm() {
   const searchParams = useSearchParams()
