@@ -1,0 +1,282 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
+import { ArrowLeft, Send, Bell } from "lucide-react"
+import axios from "axios"
+import { OfflineBanner } from "@/components/offline-banner"
+import { ErrorToast } from "@/components/error-toast"
+
+interface NotificationData {
+  title: string
+  message: string
+  priority: "normal" | "high"
+  sendImmediately: boolean
+  scheduledDate?: string
+  scheduledTime?: string
+}
+
+export default function NotificationsPage() {
+  const [formData, setFormData] = useState<NotificationData>({
+    title: "",
+    message: "",
+    priority: "normal",
+    sendImmediately: true,
+    scheduledDate: "",
+    scheduledTime: "",
+  })
+
+  const [isSending, setIsSending] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!formData.title.trim() || !formData.message.trim()) {
+      setError("Tytuł i treść wiadomości są wymagane")
+      return
+    }
+
+    if (!navigator.onLine) {
+      setError("Brak połączenia z internetem. Sprawdź swoje połączenie i spróbuj ponownie.")
+      return
+    }
+
+    setIsSending(true)
+    setError(null)
+
+    try {
+      const request = await axios.post("/api/send_notification", {
+        title: formData.title,
+        body: formData.message,
+        priority: formData.priority,
+        fcmToken:
+          "dvGvM2N-TsK2fx1sY9qUqg:APA91bGayPSyRjXNWcSK7RN2EIQ3gywP7MnQYf_pxi-CL9BEexQK0LBiNRAchuboMrVLaDc4E6VH8K6clgb2Aj_Fkv55GNVIpwGOU4HjKumAXetDvqNF_zc",
+      })
+      setIsSending(false)
+      setShowSuccess(true)
+
+      setFormData({
+        title: "",
+        message: "",
+        priority: "normal",
+        sendImmediately: true,
+        scheduledDate: "",
+        scheduledTime: "",
+      })
+      setTimeout(() => {
+        setShowSuccess(false)
+      }, 2000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Nie udało się wysłać powiadomienia. Spróbuj ponownie.")
+      setIsSending(false)
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+    }))
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      <OfflineBanner />
+
+      <AnimatePresence>
+        {error && <ErrorToast message={error} type="error" onClose={() => setError(null)} />}
+      </AnimatePresence>
+
+      {/* Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-0 left-0 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+          animate={{ x: [0, 100, 0], y: [0, 50, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-pink-500/30 rounded-full blur-3xl"
+          animate={{ x: [0, -100, 0], y: [0, -50, 0], scale: [1, 1.3, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+
+      <div className="relative z-10 p-8 ">
+        <div className="mb-8">
+          <Link
+            href="/management"
+            className="inline-flex items-center text-purple-300 hover:text-purple-200 transition-colors mb-4"
+          >
+            <ArrowLeft className="mr-2" size={20} />
+            Powrót do zarządzania
+          </Link>
+          <div className="flex justify-center gap-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+              <Bell className="text-white" size={32} />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">Wyślij Powiadomienie</h1>
+              <p className="text-purple-300">Zarządzaj powiadomieniami dla użytkowników aplikacji</p>
+            </div>
+          </div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full flex justify-center"
+        >
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
+              <div className="mb-6">
+                <label className="block text-purple-200 text-sm font-semibold mb-2">Tytuł Powiadomienia *</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Np. Nowa Promocja!"
+                  className="w-full bg-white/5 border border-purple-300/30 rounded-xl px-4 py-3 text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-purple-200 text-sm font-semibold mb-2">Treść Wiadomości *</label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  required
+                  rows={4}
+                  placeholder="Wpisz treść powiadomienia, które zobaczą użytkownicy..."
+                  className="w-full bg-white/5 border border-purple-300/30 rounded-xl px-4 py-3 text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
+                />
+                <p className="text-purple-300/70 text-xs mt-2">{formData.message.length} / 500 znaków</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-purple-200 text-sm font-semibold mb-2">Priorytet</label>
+                  <select
+                    name="priority"
+                    value={formData.priority}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-purple-300/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="normal" className="bg-slate-800">
+                      Normalny
+                    </option>
+                    <option value="high" className="bg-slate-800">
+                      Wysoki
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="flex items-center cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    name="sendImmediately"
+                    checked={formData.sendImmediately}
+                    onChange={handleInputChange}
+                    className="w-5 h-5 text-purple-500 bg-white/10 border-purple-300/30 rounded focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                  />
+                  <span className="ml-3 text-purple-200 font-medium group-hover:text-purple-100 transition-colors">
+                    Wyślij natychmiast
+                  </span>
+                </label>
+              </div>
+
+              {!formData.sendImmediately && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
+                >
+                  <div>
+                    <label className="block text-purple-200 text-sm font-semibold mb-2">Data Wysłania</label>
+                    <input
+                      type="date"
+                      name="scheduledDate"
+                      value={formData.scheduledDate}
+                      onChange={handleInputChange}
+                      className="w-full bg-white/5 border border-purple-300/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-purple-200 text-sm font-semibold mb-2">Godzina Wysłania</label>
+                    <input
+                      type="time"
+                      name="scheduledTime"
+                      value={formData.scheduledTime}
+                      onChange={handleInputChange}
+                      className="w-full bg-white/5 border border-purple-300/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </motion.div>
+              )}
+
+              <motion.button
+                type="submit"
+                disabled={isSending}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-purple-500/50 transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSending ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Wysyłanie...
+                  </>
+                ) : (
+                  <>
+                    <Send size={20} />
+                    Wyślij Powiadomienie
+                  </>
+                )}
+              </motion.button>
+            </div>
+
+            {showSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-green-500/20 backdrop-blur-lg border border-green-500/50 rounded-2xl p-6 text-center"
+              >
+                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-green-100 mb-2">Powiadomienie Wysłane!</h3>
+                <p className="text-green-200">Twoje powiadomienie zostało pomyślnie wysłane do użytkowników.</p>
+              </motion.div>
+            )}
+
+            <div className="bg-blue-500/10 backdrop-blur-lg border border-blue-500/30 rounded-2xl p-6">
+              <h3 className="text-blue-200 font-semibold mb-3 flex items-center gap-2">
+                <Bell size={20} />
+                Informacje o Powiadomieniach
+              </h3>
+              <ul className="text-blue-200/80 text-sm space-y-2">
+                <li>• Powiadomienia są wysyłane przez Firebase Cloud Messaging</li>
+                <li>• Użytkownicy muszą mieć włączone powiadomienia w aplikacji</li>
+                <li>• Wysyłka może potrwać do 5 minut</li>
+              </ul>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    </div>
+  )
+}
