@@ -21,6 +21,7 @@ type ProductFieldValue =
   | string[]
 
 // Demo data
+export const dynamic = 'force-dynamic'
 
 export default function ItemsManagementPage() {
   const [editingProduct, setEditingProduct] = useState<ProductForm | null>(null)

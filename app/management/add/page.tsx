@@ -36,6 +36,8 @@ interface productTemp{
     quantity?:string;
     location?:string
 }
+export const dynamic = 'force-dynamic'
+
 const initialForm: ProductForm = {
   id: 0,
   name: "",

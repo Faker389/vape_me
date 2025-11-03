@@ -18,6 +18,7 @@ interface NotificationData {
   scheduledDate?: string
   scheduledTime?: string
 }
+export const dynamic = 'force-dynamic'
 
 export default function NotificationsPage() {
   const [formData, setFormData] = useState<NotificationData>({

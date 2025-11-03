@@ -9,6 +9,7 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { auth } from "@/lib/firebase"
 
+export const dynamic = 'force-dynamic'
 
 export default function RootLayout({
   children,

@@ -58,6 +58,8 @@ const selectedForm = {
   store2quantity:0,
   description:"",
 }
+export const dynamic = 'force-dynamic'
+
 export default function AddCouponsPage() {
   const [couponType, setCouponType] = useState<"discount" | "item">("discount")
   const [isSubmitting, setIsSubmitting] = useState(false)

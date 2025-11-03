@@ -9,6 +9,7 @@ import { ProductForm } from "@/lib/productModel"
 import { useProductsStore } from "@/lib/storage"
 
 const cbdOptions = ["Wszystkie", "Z CBD", "Bez CBD"]
+export const dynamic = 'force-dynamic'
 
 export default function ProductsPage() {
   

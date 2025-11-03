@@ -5,6 +5,7 @@ import Link from "next/link"
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
+export const dynamic = 'force-dynamic'
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false)

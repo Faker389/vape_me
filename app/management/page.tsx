@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebase"
 import { useEffect } from "react"
 import { Package, PlusCircle, Receipt, Bell, Gift } from "lucide-react"
 import { OfflineBanner } from "@/components/offline-banner"
+export const dynamic = 'force-dynamic'
 
 export default function ManagementPage() {
   useEffect(() => {

@@ -27,6 +27,7 @@ interface ScannedCoupon {
   isDiscount: boolean
   discountamount?: number
 }
+export const dynamic = 'force-dynamic'
 
 export default function TransactionPage() {
   const [userScanned, setUserScanned] = useState<string|null>(null)
