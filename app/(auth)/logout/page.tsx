@@ -3,6 +3,7 @@ import { auth } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+export const dynamic = 'force-dynamic'
 
 export default function Logout(){
     const [success,setSuccess]=useState<boolean>(false)
