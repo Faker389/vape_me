@@ -18,7 +18,8 @@ export default function Logout(){
             window.location.href="/"
         }
     },[success])
-    return <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f]">
+    return <html lang="en">
+      <body className={`font-sans antialiased`}><div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f]">
     {/* Logo in top left */}
     <div className="absolute top-6 left-6 z-20">
     <Image src="/logo.png" alt="Company Logo" width={220} height={140} className="h-24 w-auto cursor-pointer" />
@@ -32,5 +33,5 @@ export default function Logout(){
     <div className="">
         <h1 className=" flex flex-row gap-10 text-4xl text-white"><Loader2 className="w-12 h-12 animate-spin "/> Wylogowywanie</h1>
     </div>
-    </div>
+    </div></body></html>
 }
