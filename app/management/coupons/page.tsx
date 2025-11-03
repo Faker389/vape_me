@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Percent, Package, Upload, Calendar, Coins, Save, Check, DollarSign, X } from "lucide-react"
+import { ArrowLeft, Percent, Package, Calendar, Coins, Save, Check, DollarSign, X } from "lucide-react"
 import Link from "next/link"
-import { getDatabase, ref, get, child } from "firebase/database"
 import { ProductForm } from "@/lib/productModel"
-import { collection, doc, getDocs, setDoc } from "firebase/firestore"
+import {  doc, setDoc } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 import { useProductsStore } from "@/lib/storage"
 import DiscountBox from "@/components/discountPhoto"
@@ -140,6 +139,7 @@ export default function AddCouponsPage() {
         setTimeout(() => setShowSuccess(false), 3000)
       }, 1000)
     }catch(err){
+      console.log(err)
       setTimeout(() => {
         setIsSubmitting(false)
         setShowSuccess(false)
@@ -174,6 +174,7 @@ export default function AddCouponsPage() {
         setTimeout(() => setShowSuccess(false), 3000)
       }, 1000)
     }catch(err){
+      console.log(err)
       setTimeout(() => {
         setIsSubmitting(false)
         setShowSuccess(false)

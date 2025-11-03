@@ -2,30 +2,20 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { motion } from "framer-motion"
 import { useParams } from "next/navigation"
-import { auth, db } from "@/lib/firebase"
-import { doc, getDoc } from "firebase/firestore"
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
 import { Loader2 } from "lucide-react"
 
 
 
-interface Specification{
-  Moc:string;
-  Bateria:string;
-  Material:string;
-  Wymiary:string;
-}
+
 
 export default function ProductDetailPage() {
   const params = useParams()
   const id = params.id as string 
   const [product,setProduct]=useState<ProductForm>()
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [showWorkerOptions,setShowWorkerOptions]=useState<boolean>(false)
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const { products, listenToProducts } = useProductsStore()
   const [relatedProducts, setRelatedProducts] = useState<ProductForm[]>([])
@@ -59,21 +49,6 @@ export default function ProductDetailPage() {
     }
   }, [product, products])
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user?.email === "malgorzatamagryso2.pl@gmail.com") {
-        setShowWorkerOptions(true);
-      } else {
-        setShowWorkerOptions(false);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const getLocationText = (locations: number[]) => {
-    if (locations.length === 2) return "Obie lokalizacje"
-    return `Lokalizacja ${locations[0]}`
-  }
 
   const truncateText = (text: string, maxLength: number = 150) => {
     if (text.length <= maxLength) return text
@@ -109,7 +84,7 @@ export default function ProductDetailPage() {
             <div className="glass-effect rounded-3xl p-9">
               <div className="h-96 bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-2xl flex items-center justify-center relative overflow-hidden">
                 <motion.div
-                  key={selectedImage}
+                  key={0}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   className="h-full flex items-center justify-center"

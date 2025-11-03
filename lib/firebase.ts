@@ -4,8 +4,8 @@
 import { Timestamp } from "firebase/firestore"; // client SDK
 import { getFirestore } from "firebase/firestore"
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getStorage, } from "firebase/storage";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional

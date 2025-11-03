@@ -6,11 +6,19 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Edit, X, Save, Upload, Plus } from "lucide-react"
 import { auth, db, storage } from "@/lib/firebase"
-import { collection, doc, getDocs, setDoc, updateDoc } from "firebase/firestore"
+import {  doc, updateDoc } from "firebase/firestore"
 import { ProductForm } from "@/lib/productModel"
 import { useProductsStore } from "@/lib/storage"
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
-
+type ProductFieldValue =
+  | string
+  | number
+  | boolean
+  | File
+  | null
+  | undefined
+  | Record<string, string>
+  | string[]
 
 // Demo data
 
@@ -99,8 +107,8 @@ export default function ItemsManagementPage() {
       let imageUrl = formData.image;
       const storageRef = ref(storage, `products/${formData.id}.webp`);
       // === CASE 1: User selected a local file ===
-      if ((formData as any).imageFile) {
-        const file = (formData as any).imageFile as File;
+      if (formData.imageFile) {
+        const file = formData.imageFile as File;
         console.log("📸 Uploading local file:", file.name);
   
         // Upload file directly to Firebase Storage
@@ -134,7 +142,7 @@ export default function ItemsManagementPage() {
   
       // Prepare product data
       const productData = { ...formData, image: imageUrl,features,specifications };
-      delete (productData as any).imageFile; // cleanup before sending
+      delete productData.imageFile; // cleanup before sending
   
       // Save or update product
       await updateProduct(productData.id.toString(), productData);
@@ -147,7 +155,7 @@ export default function ItemsManagementPage() {
       console.error("❌ Error submitting product:", error);
     }
   };
-  const handleInputChange = (field: keyof ProductForm, value: any) => {
+  const handleInputChange = (field: keyof ProductForm, value: ProductFieldValue) => {
     if (!formData) return
     setFormData({ ...formData, [field]: value })
   }

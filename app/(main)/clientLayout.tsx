@@ -3,7 +3,7 @@ import type React from "react"
 import "../../app/globals.css";
 import { AgeVerificationModal } from "@/components/age-verification"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"

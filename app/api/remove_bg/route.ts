@@ -16,8 +16,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     res.setHeader("Content-Type", "image/png");
     res.send(response.data);
-  } catch (err: any) {
-    console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "Failed to remove background" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to remove background"+err });
   }
 }

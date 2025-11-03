@@ -7,7 +7,6 @@ import Image from "next/image"
 import { ArrowLeft, CheckCircle, XCircle, ShoppingCart, Tag, CreditCard, X } from "lucide-react"
 import { auth, currentDate, db, transactions } from "@/lib/firebase"
 import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
-import { ProductForm } from "@/lib/productModel"
 import { arrayUnion, collection, doc, getDoc, getDocs, where, increment, query, updateDoc, writeBatch } from "firebase/firestore"
 import axios from "axios"
 
@@ -104,12 +103,12 @@ export default function TransactionPage() {
     
   useBarcodeScanner((code) => {
     if (code.includes("coupon") && code.includes("user")) {
-      var couponID = code.slice(6, code.indexOf("user"))
-      var userID = `+${code.slice(code.indexOf("user") + 4)}`
+      const couponID = code.slice(6, code.indexOf("user"))
+      const userID = `+${code.slice(code.indexOf("user") + 4)}`
       fetchCoupon(couponID, userID)
       checkIfExists(userID)
     } else if (code.includes("user")) {
-      var userID = `+${code.slice(4)}`;
+      const userID = `+${code.slice(4)}`;
       checkIfExists(userID)
     } else {
       fetchProduct(code)
@@ -182,7 +181,7 @@ export default function TransactionPage() {
       if (userScanned !== null) {
         const docRef = doc(db, "users", userScanned);
         const docSnap = await getDoc(docRef);
-        var newTransaction = {
+        const newTransaction = {
           description: "Nowe zakupy",
           id: crypto.randomUUID(),
           imageUrl: "",
@@ -198,7 +197,7 @@ export default function TransactionPage() {
         });
         console.log(`Added ${totalPoints} points to ${userScanned}`);
 
-        for(var x=0;x<scannedCoupons.length;x++){
+        for(let x=0;x<scannedCoupons.length;x++){
           const coupon = scannedCoupons[x];
           const couponRef = doc(db, "users", userScanned, "coupons", coupon.id);
           await updateDoc(couponRef, {
@@ -210,7 +209,7 @@ export default function TransactionPage() {
 
         setUserScanned(userScanned);
         const data = docSnap.data();
-        var fcmToken = data.token ?? "";
+        const fcmToken = data.token ?? "";
 
         const request = await axios.post("/api/send_notification", {
           title: "Otrzymujesz nowe buszki!",

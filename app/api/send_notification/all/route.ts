@@ -1,7 +1,6 @@
 "use server"
 import { NextRequest, NextResponse } from "next/server";
 import admin from "firebase-admin";
-import axios from "axios";
 
 if (!admin.apps.length) {
     admin.initializeApp({
@@ -14,8 +13,6 @@ if (!admin.apps.length) {
   }
   const db = admin.firestore();
 
-  type NotificationType = "newsUpdates" | "pointsActivity" | "promotions";
-  type PriorityType = "high" | "normal";
   
   export async function POST(req: NextRequest) {
     const { title, body, priority, notificationType } = await req.json();
@@ -33,7 +30,7 @@ if (!admin.apps.length) {
       const sendPromises: Promise<string>[] = [];
   
       usersSnapshot.forEach((doc) => {
-        const user = doc.data() as any;
+        const user = doc.data();
   
         if (
           user.notifications?.pushNotifications &&

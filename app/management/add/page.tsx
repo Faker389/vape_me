@@ -4,15 +4,22 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import Image from "next/image"
 import { ArrowLeft, Plus, Save, Upload, X } from "lucide-react"
 import { auth, db, storage } from "@/lib/firebase"
-import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore"
+import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
 import { ProductForm } from "@/lib/productModel"
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 import { useProductsStore } from "@/lib/storage"
-
+type ProductFieldValue =
+  | string
+  | number
+  | boolean
+  | File
+  | null
+  | undefined
+  | Record<string, string>
+  | string[]
 interface productTemp{
     id: number
     name: string
@@ -96,13 +103,12 @@ export default function AddProductPage() {
     setSpecifications(updatedSpecs)
     setFormData({ ...formData, specifications: updatedSpecs })
   }
-  const handleInputChange = (field: keyof productTemp, value: any) => {
-    if (field === "id") {
+  const handleInputChange = (field: keyof productTemp, value: ProductFieldValue) => {
+    if (field === "id" && typeof value === "number") {
       checkIfExists(value)
-      return;
+      return
     }
-
-    // Handle quantity input based on selected location
+  
     if (field === "quantity") {
       const quantityValue = Number(value) || 0
       if (location === "location1") {
@@ -112,15 +118,14 @@ export default function AddProductPage() {
       }
       return
     }
-
-    // Handle location select change
-    if (field === "location") {
+  
+    if (field === "location" && typeof value === "string") {
       const newLocation = value as "location1" | "location2"
       setLocation(newLocation)
       return
     }
-
-    setFormData({ ...formData, [field]: value })
+  
+    setFormData({ ...formData, [field]: value as never })
   }
 
 
@@ -132,7 +137,7 @@ export default function AddProductPage() {
         setFormData({...initialForm,id})
         return;
       }
-      var obj= {
+      const obj= {
         id: Number(product.id),
         name: product.name ?? "",
         category: product.category ?? "",
@@ -177,8 +182,7 @@ export default function AddProductPage() {
     try {
       const productRef = doc(db, "products", productId.toString())
   
-      // Cast to 'any' so TypeScript stops complaining
-      await updateDoc(productRef, updatedData as any)
+      await updateDoc(productRef, updatedData)
   
       console.log("Product updated successfully")
     } catch (error) {
@@ -194,8 +198,8 @@ export default function AddProductPage() {
   
       // Determine source image
       let fileBlob: Blob | null = null;
-      if ((formData as any).imageFile) {
-        fileBlob = (formData as any).imageFile;
+      if (formData.imageFile) {
+        fileBlob = (formData).imageFile;
       } else if (formData.image && formData.image.trim() !== "") {
         const res = await fetch("/api/download-image", {
           method: "POST",
@@ -227,7 +231,7 @@ export default function AddProductPage() {
       }
   
       const productData = { ...formData, image: imageUrl };
-      delete (productData as any).imageFile;
+      delete productData.imageFile;
   
       if (isNew.current) await addProduct(productData);
       else await updateProduct(productData.id, productData);

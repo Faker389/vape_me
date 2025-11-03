@@ -50,7 +50,7 @@ export default function NotificationsPage() {
     setError(null)
 
     try {
-      const request = await axios.post("/api/send_notification", {
+      await axios.post("/api/send_notification", {
         title: formData.title,
         body: formData.message,
         priority: formData.priority,

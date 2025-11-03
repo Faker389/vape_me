@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { motion, useScroll, useTransform, useMotionValue, useSpring, type PanInfo } from "framer-motion"
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
 
@@ -14,7 +14,6 @@ export default function Home() {
   const { products, listenToProducts } = useProductsStore()
   const [bestsellers, setBestsellers] = useState<ProductForm[]>([])
   const [newProducts, setNewProducts] = useState<ProductForm[]>([])
-  const [mounted, setMounted] = useState(false)
 
   
   useEffect(() => {
@@ -406,7 +405,7 @@ function InfiniteScrollSection({
     return () => clearInterval(interval)
   }, [x, direction, totalWidth, isDragging])
 
-  const handleDragEnd = (_: any, info: PanInfo) => {
+  const handleDragEnd = () => {
     setIsDragging(false)
   }
 

@@ -22,7 +22,6 @@ export default function ProductsPage() {
   const [selectedCBD, setSelectedCBD] = useState("Wszystkie")
   const [priceRange, setPriceRange] = useState([0, 200])
   const [sortBy, setSortBy] = useState("default")
-  const [showFilters, setShowFilters] = useState(true)
   const [showWorkerOptions, setShowWorkerOptions] = useState<boolean>(false)
   const { products, listenToProducts } = useProductsStore()
   
@@ -53,16 +52,16 @@ export default function ProductsPage() {
   })
   
   function getBrands(items:ProductForm[]){
-    var brands = ["Wszystkie"]
-    for(var x=0;x<items.length;x++){
+    const brands = ["Wszystkie"]
+    for(let x=0;x<items.length;x++){
       if(!brands.includes(items[x].brand)) brands.push(items[x].brand)
     }
     setBrands(brands);
   }
   
   function getCategories(items:ProductForm[]){
-    var categories = ["Wszystkie"]
-    for(var x=0;x<items.length;x++){
+    const categories = ["Wszystkie"]
+    for(let x=0;x<items.length;x++){
       if(!categories.includes(items[x].category)) categories.push(items[x].category)
     }
     setCategories(categories);
@@ -150,7 +149,6 @@ export default function ProductsPage() {
 
         <div className="flex gap-8">
           <AnimatePresence>
-            {showFilters && (
               <motion.aside
                 initial={{ x: -300, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -299,7 +297,6 @@ export default function ProductsPage() {
                   Resetuj Filtry
                 </motion.button>
               </motion.aside>
-            )}
           </AnimatePresence>
 
           {/* Product grid */}
