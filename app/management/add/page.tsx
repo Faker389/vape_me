@@ -201,12 +201,17 @@ export default function AddProductPage() {
       if (formData.imageFile) {
         fileBlob = (formData).imageFile;
       } else if (formData.image && formData.image.trim() !== "") {
-        const res = await fetch("/api/download-image", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: formData.image }),
-        });
-        fileBlob = await res.blob();
+        try{
+
+          const res = await fetch("/api/download-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: formData.image }),
+          });
+          fileBlob = await res.blob();
+        }catch(e){
+          console.log(e)
+        }
       }
   
       // If removeBG is true, send the image through remove.bg
