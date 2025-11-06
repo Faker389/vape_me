@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
+import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion"
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
+import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
+import { X } from "lucide-react"
 export const dynamic = 'force-dynamic'
 
 export default function Home() {
@@ -15,6 +17,7 @@ export default function Home() {
   const { products, listenToProducts } = useProductsStore()
   const [bestsellers, setBestsellers] = useState<ProductForm[]>([])
   const [newProducts, setNewProducts] = useState<ProductForm[]>([])
+  const isOnline = useOnlineStatus();
 
   
   useEffect(() => {
@@ -354,7 +357,21 @@ export default function Home() {
               </div>
             </div>
           </div>
-
+          <AnimatePresence>
+        {!isOnline && (
+    <motion.div
+      key="offline-alert"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ type: "spring", stiffness: 120 }}
+      className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
+    >
+      <X className="w-6 h-6" />
+      <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
+    </motion.div>
+  )}
+</AnimatePresence>
           <div className="border-t border-white/10 pt-8 text-center text-gray-400 text-sm">
             © 2025 Vape me. Wszelkie prawa zastrzeżone.
           </div>
@@ -471,6 +488,7 @@ function InfiniteScrollSection({
             </Link>
           ))}
         </motion.div>
+    
       </div>
     </section>
   )

@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { useParams } from "next/navigation"
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
-import { Loader2 } from "lucide-react"
+import { Loader2, X } from "lucide-react"
+import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 
 
 
@@ -20,6 +21,7 @@ export default function ProductDetailPage() {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const { products, listenToProducts } = useProductsStore()
   const [relatedProducts, setRelatedProducts] = useState<ProductForm[]>([])
+  const isOnline = useOnlineStatus();
  
   useEffect(()=>{
     listenToProducts();
@@ -287,7 +289,21 @@ export default function ProductDetailPage() {
           </motion.div>
         )}
       </div>:<div className="flex items-center justify-center h-96"><h1 className="flex flex-row items-center gap-3 text-white text-2xl"><Loader2 className="w-8 h-8 animate-spin"/>Ładowanie Produktu</h1></div>}
-
+        <AnimatePresence>
+        {!isOnline && (
+    <motion.div
+      key="offline-alert"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ type: "spring", stiffness: 120 }}
+      className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
+    >
+      <X className="w-6 h-6" />
+      <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
+    </motion.div>
+  )}
+</AnimatePresence>
       <footer className="py-12 border-t border-white/10 mt-20">
         <div className="max-w-7xl mx-auto px-6 text-center text-gray-400 text-sm">
           © 2025 Vape me. Wszelkie prawa zastrzeżone.

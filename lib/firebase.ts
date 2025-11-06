@@ -18,6 +18,18 @@ rewardId:string
 timestamp:Timestamp
 type:"earn"|"redeem"
 }
+export interface coupon{
+  id: string
+    name: string
+    description: string
+    imageUrl: string
+    pointsCost: number
+    category: string
+    isDiscount: boolean
+    discountamount?: number
+    expiryDate: Timestamp
+    minimalPrice?: number
+}
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

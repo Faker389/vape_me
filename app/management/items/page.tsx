@@ -10,6 +10,7 @@ import {  doc, updateDoc } from "firebase/firestore"
 import { ProductForm } from "@/lib/productModel"
 import { useProductsStore } from "@/lib/storage"
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
+import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 type ProductFieldValue =
   | string
   | number
@@ -34,6 +35,8 @@ export default function ItemsManagementPage() {
   const [newFeature, setNewFeature] = useState("")
   const [newSpecKey, setNewSpecKey] = useState("")
   const [newSpecValue, setNewSpecValue] = useState("")
+  const isOnline = useOnlineStatus();
+
   const filteredProducts = products&&products.filter(e => {
     const query = searchQuery.toLowerCase().trim()
     return (
@@ -218,7 +221,7 @@ export default function ItemsManagementPage() {
         <div className="flex gap-8">
           <div className="flex-1">
             <div className="space-y-4">
-              {products&&filteredProducts.slice(0,50).map((product, index) => (
+              {isOnline&&products&&filteredProducts.slice(0,50).map((product, index) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -592,6 +595,21 @@ export default function ItemsManagementPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      <AnimatePresence>
+  {!isOnline && (
+    <motion.div
+      key="offline-alert"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ type: "spring", stiffness: 120 }}
+      className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
+    >
+      <X className="w-6 h-6" />
+      <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
+    </motion.div>
+  )}
+</AnimatePresence>
     </div>
   )
 }

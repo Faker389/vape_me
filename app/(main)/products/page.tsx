@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { auth } from "@/lib/firebase"
 import { ProductForm } from "@/lib/productModel"
 import { useProductsStore } from "@/lib/storage"
+import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
+import { X } from "lucide-react"
 
 const cbdOptions = ["Wszystkie", "Z CBD", "Bez CBD"]
 export const dynamic = 'force-dynamic'
@@ -25,6 +27,7 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState("default")
   const [showWorkerOptions, setShowWorkerOptions] = useState<boolean>(false)
   const { products, listenToProducts } = useProductsStore()
+  const isOnline = useOnlineStatus();
   
   useEffect(() => {
     listenToProducts()
@@ -313,7 +316,7 @@ export default function ProductsPage() {
                   </div>
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence mode="popLayout">
-                {filteredProducts.map((product) => (
+                {isOnline&&filteredProducts.map((product) => (
                   <motion.div
                     key={product.id}
                     layout
@@ -387,6 +390,21 @@ export default function ProductsPage() {
                   </motion.div>
                 ))}
               </AnimatePresence>
+              <AnimatePresence>
+        {!isOnline && (
+    <motion.div
+      key="offline-alert"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ type: "spring", stiffness: 120 }}
+      className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
+    >
+      <X className="w-6 h-6" />
+      <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
+    </motion.div>
+  )}
+</AnimatePresence>
             </motion.div>
           </div>
         </div>

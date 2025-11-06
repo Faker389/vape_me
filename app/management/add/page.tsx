@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowLeft, Plus, Save, Upload, X } from "lucide-react"
 import { auth, db, storage } from "@/lib/firebase"
@@ -11,6 +11,7 @@ import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
 import { ProductForm } from "@/lib/productModel"
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 import { useProductsStore } from "@/lib/storage"
+import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 type ProductFieldValue =
   | string
   | number
@@ -67,6 +68,8 @@ export default function AddProductPage() {
   const [newSpecKey, setNewSpecKey] = useState("")
   const [newSpecValue, setNewSpecValue] = useState("")
   const { products, listenToProducts } = useProductsStore()
+  const isOnline = useOnlineStatus();
+
   useEffect(() => {
     listenToProducts()
   }, [listenToProducts])
@@ -318,7 +321,7 @@ export default function AddProductPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          onSubmit={handleSubmit}
+          onSubmit={isOnline?handleSubmit:()=>{}}
           className="max-w-3xl bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-xl border border-white/10 rounded-2xl p-8"
         >
           <div className="space-y-6">
@@ -620,6 +623,7 @@ export default function AddProductPage() {
               Wyczyść formularz
             </motion.button>
             <motion.button
+              disabled={!isOnline}
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -630,6 +634,21 @@ export default function AddProductPage() {
             </motion.button>
           </div>
         </motion.form>
+        <AnimatePresence>
+  {!isOnline && (
+    <motion.div
+      key="offline-alert"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ type: "spring", stiffness: 120 }}
+      className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
+    >
+      <X className="w-6 h-6" />
+      <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
+    </motion.div>
+  )}
+</AnimatePresence>
       </div>
     </div>
   )

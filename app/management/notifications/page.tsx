@@ -5,10 +5,11 @@ import type React from "react"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { ArrowLeft, Send, Bell } from "lucide-react"
+import { ArrowLeft, Send, Bell, X } from "lucide-react"
 import axios from "axios"
 import { OfflineBanner } from "@/components/offline-banner"
 import { ErrorToast } from "@/components/error-toast"
+import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 
 interface NotificationData {
   title: string
@@ -33,6 +34,7 @@ export default function NotificationsPage() {
   const [isSending, setIsSending] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const isOnline = useOnlineStatus();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -229,7 +231,7 @@ export default function NotificationsPage() {
 
               <motion.button
                 type="submit"
-                disabled={isSending}
+                disabled={isSending||!isOnline}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-purple-500/50 transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -277,6 +279,21 @@ export default function NotificationsPage() {
             </div>
           </form>
         </motion.div>
+        <AnimatePresence>
+        {!isOnline && (
+    <motion.div
+      key="offline-alert"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ type: "spring", stiffness: 120 }}
+      className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
+    >
+      <X className="w-6 h-6" />
+      <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
+    </motion.div>
+  )}
+</AnimatePresence>
       </div>
     </div>
   )

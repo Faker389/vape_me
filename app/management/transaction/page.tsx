@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, CheckCircle, XCircle, ShoppingCart, Tag, CreditCard, X } from "lucide-react"
@@ -9,6 +9,7 @@ import { auth, currentDate, db, transactions } from "@/lib/firebase"
 import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
 import { arrayUnion, collection, doc, getDoc, getDocs, where, increment, query, updateDoc, writeBatch } from "firebase/firestore"
 import axios from "axios"
+import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 
 interface ScannedItem {
   id: number
@@ -33,6 +34,7 @@ export default function TransactionPage() {
   const [userScanned, setUserScanned] = useState<string|null>(null)
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([])
   const [scannedCoupons, setscannedCoupons] = useState<ScannedCoupon[]>([])
+  const isOnline = useOnlineStatus();
 
   async function fetchProduct(productId: string) {
     try {
@@ -462,12 +464,27 @@ export default function TransactionPage() {
           transition={{ delay: 0.5 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleFinishTransaction}
+          onClick={isOnline?handleFinishTransaction:()=>{}}
           disabled={!userScanned}
           className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {userScanned ? "Zakończ transakcję" : "Zeskanuj użytkownika aby kontynuować"}
+         Zakończ transakcję
         </motion.button>
+        <AnimatePresence>
+  {!isOnline && (
+    <motion.div
+      key="offline-alert"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ type: "spring", stiffness: 120 }}
+      className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
+    >
+      <X className="w-6 h-6" />
+      <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
+    </motion.div>
+  )}
+</AnimatePresence>
       </div>
     </div>
   )
