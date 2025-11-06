@@ -1,38 +1,14 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, useCallback } from "react"
+import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Percent, Package, Calendar, Coins, Save, Check, DollarSign, X, List } from "lucide-react"
+import { ArrowLeft, Percent, Package, Check, X, List } from "lucide-react"
 import Link from "next/link"
 import { auth } from "@/lib/firebase"
 import DiscountForm from "./DiscountForm"
 import CouponForm from "./CouponForm"
 import CouponList from "./CouponList"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
-
-interface coupon {
-  id: string
-  name: string
-  description: string
-  imageUrl: string
-  pointsCost: number
-  category: string
-  isDiscount: boolean
-  discountamount?: number
-  expiryDate: Date
-  minimalPrice?: number
-}
-
-interface formCoupon {
-  title: string
-  category: string
-  description: string
-  discountPercent: number
-  pointCost: number
-  expiryDays: number
-  minimalPrice: number
-  imageUrl: string
-}
 
 export const dynamic = 'force-dynamic'
 

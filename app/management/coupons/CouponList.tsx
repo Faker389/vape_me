@@ -2,7 +2,7 @@ import { coupon, db } from "@/lib/firebase"
 import { collection, doc, onSnapshot, updateDoc, deleteDoc, Timestamp } from "firebase/firestore"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
-import { Calendar, Coins, Edit2, Package, Percent, Save, Trash2, X } from "lucide-react"
+import { Calendar, Coins, Edit2, Package, Save, Trash2, X } from "lucide-react"
 import { useEffect, useState } from "react"
 
 function DiscountBox({percentage}:{percentage:number}) {
@@ -17,12 +17,12 @@ function DiscountBox({percentage}:{percentage:number}) {
 
 export default function CouponList(){
     const [coupons, setCoupons] = useState<coupon[]>([])
-    const [editingCoupon, setEditingCoupon] = useState<any>(null)
+    const [editingCoupon, setEditingCoupon] = useState<coupon>(null)
     
     async function getCoupons(){
         try {
             
-            const unsub = onSnapshot(collection(db, "coupons"), (snapshot) => {
+            onSnapshot(collection(db, "coupons"), (snapshot) => {
                 const data = snapshot.docs.map((doc) => doc.data() as coupon)
                 setCoupons(data)
             })

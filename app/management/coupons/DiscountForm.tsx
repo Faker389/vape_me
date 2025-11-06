@@ -1,8 +1,7 @@
 
 import React, { useState  } from "react"
 import { motion } from "framer-motion"
-import {  Calendar, Coins, Save, DollarSign, X } from "lucide-react"
-import { ProductForm } from "@/lib/productModel"
+import {  Calendar, Coins, Save, DollarSign } from "lucide-react"
 import {  doc, setDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import DiscountBox from "@/components/discountPhoto"
@@ -54,9 +53,7 @@ interface coupon {
   }
 export default function DiscountForm({fkc}:{fkc:(e:boolean)=> void}){
     const [discountForm, setDiscountForm] = useState<formCoupon>(initialform)
-    const [selectedProduct, setSelectedProduct] = useState<ProductForm>(selectedForm)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [showSuccess, setShowSuccess] = useState(false)
 
     async function addProduct(product: coupon) {
         try {
@@ -70,7 +67,6 @@ export default function DiscountForm({fkc}:{fkc:(e:boolean)=> void}){
 
     const handleDiscountSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!selectedProduct) return;
         setIsSubmitting(true)
         const expiryDate = new Date()
         expiryDate.setDate(expiryDate.getDate() + Number(discountForm.expiryDays))
@@ -90,15 +86,15 @@ export default function DiscountForm({fkc}:{fkc:(e:boolean)=> void}){
           await addProduct(couponData);
           setTimeout(() => {
             setIsSubmitting(false)
-            setShowSuccess(true)
+            fkc(true)
             setDiscountForm(initialform)
-            setTimeout(() => setShowSuccess(false), 3000)
+            setTimeout(() => fkc(false), 3000)
           }, 1000)
         }catch(err){
           console.log(err)
           setTimeout(() => {
             setIsSubmitting(false)
-            setShowSuccess(false)
+            fkc(false)
             setDiscountForm(initialform)
           }, 1000)
         }
