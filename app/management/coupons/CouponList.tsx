@@ -13,27 +13,34 @@ function DiscountBox({percentage}:{percentage:number}) {
         </span>
       </div>
     );
-  }
+}
+
+// Extended interface for editing state (with string values for form inputs)
+interface EditingCoupon extends Omit<coupon, 'pointsCost' | 'discountamount' | 'minimalPrice' | 'expiryDate'> {
+    pointsCost: string
+    discountamount: string
+    minimalPrice: string
+    expiryDate: string
+}
 
 export default function CouponList(){
     const [coupons, setCoupons] = useState<coupon[]>([])
-    const [editingCoupon, setEditingCoupon] = useState<coupon>(null)
+    const [editingCoupon, setEditingCoupon] = useState<EditingCoupon | null>(null)
     
-    async function getCoupons(){
-        try {
-            
-            onSnapshot(collection(db, "coupons"), (snapshot) => {
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            collection(db, "coupons"), 
+            (snapshot) => {
                 const data = snapshot.docs.map((doc) => doc.data() as coupon)
                 setCoupons(data)
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-    
-    useEffect(()=>{
-        getCoupons();
-    },[])
+            },
+            (error) => {
+                console.error("Error fetching coupons:", error)
+            }
+        )
+        
+        return () => unsubscribe()
+    }, [])
     
     const handleDeleteCoupon = async (id: string) => {
         try {
@@ -45,16 +52,31 @@ export default function CouponList(){
     }
     
     const handleEditCoupon = (coupon: coupon) => {
-        const expiryDate = coupon.expiryDate && typeof coupon.expiryDate.toDate === 'function'
-            ? coupon.expiryDate.toDate().toISOString().slice(0, 16)
-            : "";
+        // Convert Firestore Timestamp to datetime-local string format
+        let expiryDateString = "";
+        if (coupon.expiryDate) {
+            try {
+                if (typeof coupon.expiryDate.toDate === 'function') {
+                    expiryDateString = coupon.expiryDate.toDate().toISOString().slice(0, 16);
+                } else if (coupon.expiryDate instanceof Date) {
+                    expiryDateString = coupon.expiryDate.toISOString().slice(0, 16);
+                }
+            } catch (error) {
+                console.error("Error converting expiry date:", error);
+            }
+        }
       
         setEditingCoupon({
-          ...coupon,
-          expiryDate,
-          pointsCost: coupon.pointsCost.toString(),
-          discountAmount: coupon.discountamount?.toString() || "",
-          minimalPrice: coupon.minimalPrice?.toString() || "",
+            id: coupon.id,
+            name: coupon.name,
+            description: coupon.description,
+            imageUrl: coupon.imageUrl,
+            category: coupon.category,
+            isDiscount: coupon.isDiscount,
+            expiryDate: expiryDateString,
+            pointsCost: coupon.pointsCost.toString(),
+            discountamount: coupon.discountamount?.toString() || "",
+            minimalPrice: coupon.minimalPrice?.toString() || "",
         });
     };
     
@@ -64,17 +86,37 @@ export default function CouponList(){
         try {
             const couponRef = doc(db, "coupons", editingCoupon.id.toString())
             
-            const updateData: Partial<coupon>  = {
+            // Convert the datetime-local string to Firestore Timestamp
+            let expiryTimestamp;
+            if (editingCoupon.expiryDate) {
+                try {
+                    const date = new Date(editingCoupon.expiryDate);
+                    if (isNaN(date.getTime())) {
+                        alert("Nieprawidłowa data wygaśnięcia");
+                        return;
+                    }
+                    expiryTimestamp = Timestamp.fromDate(date);
+                } catch (error) {
+                    console.error("Error converting date:", error);
+                    alert("Nieprawidłowa data wygaśnięcia");
+                    return;
+                }
+            }
+            
+            const updateData: Partial<coupon> = {
                 name: editingCoupon.name,
                 category: editingCoupon.category,
                 description: editingCoupon.description,
-                pointsCost: Number.parseInt(editingCoupon.pointsCost),
-                expiryDate: Timestamp.fromDate(new Date(editingCoupon.expiryDate)),
+                pointsCost: parseInt(editingCoupon.pointsCost) || 0,
+            }
+            
+            if (expiryTimestamp) {
+                updateData.expiryDate = expiryTimestamp;
             }
             
             if (editingCoupon.isDiscount) {
-                updateData.discountAmount = Number.parseInt(editingCoupon.discountAmount)
-                updateData.minimalPrice = Number.parseInt(editingCoupon.minimalPrice)
+                updateData.discountamount = parseInt(editingCoupon.discountamount) || 0
+                updateData.minimalPrice = parseInt(editingCoupon.minimalPrice) || 0
             } else {
                 updateData.imageUrl = editingCoupon.imageUrl
             }
@@ -85,6 +127,7 @@ export default function CouponList(){
             setEditingCoupon(null)
         } catch (error) {
             console.error("Error updating coupon:", error)
+            alert("Błąd podczas aktualizacji kuponu")
         }
     }
     
@@ -253,8 +296,8 @@ export default function CouponList(){
                                             <label className="block text-white font-medium mb-2">Zniżka (%)</label>
                                             <input
                                                 type="number"
-                                                value={editingCoupon.discountAmount}
-                                                onChange={(e) => setEditingCoupon({ ...editingCoupon, discountAmount: e.target.value })}
+                                                value={editingCoupon.discountamount}
+                                                onChange={(e) => setEditingCoupon({ ...editingCoupon, discountamount: e.target.value })}
                                                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                             />
                                         </div>
