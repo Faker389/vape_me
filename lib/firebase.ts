@@ -56,7 +56,6 @@ if (typeof window !== "undefined") {
   storage = getStorage(app)
 }
 
-// @ts-ignore - These will be initialized on client side
 export { app, auth, provider, db, storage }
 
 export const currentDate = Timestamp.fromDate(new Date())
