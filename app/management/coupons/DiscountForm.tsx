@@ -37,20 +37,7 @@ interface coupon {
     minimalPrice:0,
     imageUrl: "",
   }
-  const selectedForm = {
-    id: 0,
-    name: "",
-    category: "",
-    brand: "",
-    price: 0,
-    isNew: false,
-    isBestseller: false,
-    hasCBD: false,
-    image: "",
-    store1quantity:0,
-    store2quantity:0,
-    description:"",
-  }
+
 export default function DiscountForm({fkc}:{fkc:(e:boolean)=> void}){
     const [discountForm, setDiscountForm] = useState<formCoupon>(initialform)
     const [isSubmitting, setIsSubmitting] = useState(false)

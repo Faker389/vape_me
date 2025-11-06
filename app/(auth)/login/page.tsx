@@ -1,4 +1,4 @@
-"use client" // <-- Add this at the very top
+"use client"
 
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
@@ -9,14 +9,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { auth, provider } from "@/lib/firebase"
 import { signInWithPopup, signOut } from "firebase/auth"
 import { Button } from "@/components/ui/button"
-export const dynamic = 'force-dynamic'
 
 export default function LoginForm() {
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    setIsReady(true)
+  }, [])
 
   const logOut = async () => {
+    if (!auth) return
     try {
       await signOut(auth)
     } catch (error) {
@@ -25,6 +30,10 @@ export default function LoginForm() {
   }
 
   const signInWithGoogle = async () => {
+    if (!auth || !provider) {
+      setErrorMessage("Firebase is not initialized. Please check your configuration.")
+      return
+    }
     try {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
@@ -58,6 +67,10 @@ export default function LoginForm() {
     }
   }, [error])
 
+  if (!isReady) {
+    return null
+  }
+
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f]">
       {/* Logo in top left */}
@@ -74,9 +87,7 @@ export default function LoginForm() {
       {/* Card */}
       <Card className="w-full max-w-md z-10 shadow-xl glass-effect border border-white/10 bg-[#0a0a0f]/80 backdrop-blur-xl text-white">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center gradient-text">
-            Witamy w panelu logowania
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold text-center gradient-text">Witamy w panelu logowania</CardTitle>
           <CardDescription className="text-center text-gray-400">
             Jeśli jesteś pracownikiem Vape Me — zaloguj się
           </CardDescription>
