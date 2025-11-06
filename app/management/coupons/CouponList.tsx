@@ -64,7 +64,7 @@ export default function CouponList(){
         try {
             const couponRef = doc(db, "coupons", editingCoupon.id.toString())
             
-            const updateData: any = {
+            const updateData: Partial<coupon>  = {
                 name: editingCoupon.name,
                 category: editingCoupon.category,
                 description: editingCoupon.description,
