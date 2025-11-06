@@ -85,9 +85,9 @@ export default function Home() {
 
         <motion.div
           style={{ opacity, scale }}
-          className="relative z-10 max-w-7xl mx-auto px-6 gap-12 items-center"
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 gap-12 items-center"
         >
-          <div className="space-y-8 w-full">
+          <div className="space-y-6 sm:space-y-8 w-full">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: isVisible ? 1 : 0, x: isVisible ? 0 : -50 }}
@@ -381,6 +381,7 @@ export default function Home() {
   )
 }
 
+
 function InfiniteScrollSection({
   title,
   subtitle,
@@ -394,19 +395,26 @@ function InfiniteScrollSection({
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
-  const springX = useSpring(x, { stiffness: 300, damping: 50 })
-  const [isDragging, setIsDragging] = useState(false)
+  const springX = useSpring(x, { stiffness: 100, damping: 30, mass: 0.5 })
+  const [isPaused, setIsPaused] = useState(false)
+  const animationRef = useRef<number>(0)
 
   // Calculate total width for seamless loop
   const cardWidth = 288 + 24 // 72 * 4 (w-72) + gap-6
   const totalWidth = cardWidth * products.length
 
   useEffect(() => {
-    if (isDragging) return
+    if (isPaused) {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+      return
+    }
 
     const animate = () => {
       const currentX = x.get()
-      const speed = direction === "left" ? -0.5 : 0.5
+      const speed = direction === "left" ? -0.8 : 0.8
+
       const newX = currentX + speed
 
       // Seamless loop
@@ -417,14 +425,33 @@ function InfiniteScrollSection({
       } else {
         x.set(newX)
       }
+
+      animationRef.current = requestAnimationFrame(animate)
     }
 
-    const interval = setInterval(animate, 16)
-    return () => clearInterval(interval)
-  }, [x, direction, totalWidth, isDragging])
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [x, direction, totalWidth, isPaused])
+
+  const handleTouchStart = () => {
+    setIsPaused(true)
+  }
+
+  const handleTouchEnd = () => {
+    setIsPaused(false)
+  }
+
+  const handleDragStart = () => {
+    setIsPaused(true)
+  }
 
   const handleDragEnd = () => {
-    setIsDragging(false)
+    setIsPaused(false)
   }
 
   return (
@@ -441,15 +468,21 @@ function InfiniteScrollSection({
         <p className="text-gray-400 text-lg">{subtitle}</p>
       </div>
 
-      <div className="relative cursor-grab active:cursor-grabbing" ref={containerRef}>
+      <div
+        className="relative cursor-grab active:cursor-grabbing"
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <motion.div
           className="flex gap-6"
           style={{ x: springX }}
           drag="x"
           dragConstraints={{ left: -totalWidth / 2, right: 0 }}
-          onDragStart={() => setIsDragging(true)}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           dragElastic={0.1}
+          dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
         >
           {/* Duplicate products for seamless loop */}
           {[...products, ...products].map((product, i) => (
@@ -460,8 +493,8 @@ function InfiniteScrollSection({
               >
                 <div className="h-64 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden p-4">
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <img 
-                      src={product.image} 
+                    <img
+                      src={product.image || "/placeholder.svg"}
                       alt={product.name}
                       className="h-full w-auto object-contain"
                     />
@@ -488,7 +521,6 @@ function InfiniteScrollSection({
             </Link>
           ))}
         </motion.div>
-    
       </div>
     </section>
   )
