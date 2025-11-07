@@ -121,7 +121,7 @@ export default function Home() {
               transition={{ delay: 0.6 }}
               className="flex flex-wrap gap-4 w-fit"
             >
-              <a href="/app-release.apk" className="cursor-pointer">
+              <a href="/vape_me.apk" className="cursor-pointer">
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)" }}
                   whileTap={{ scale: 0.95 }}
