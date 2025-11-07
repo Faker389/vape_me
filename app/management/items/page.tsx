@@ -166,12 +166,12 @@ export default function ItemsManagementPage() {
   
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user?.email !== "malgorzatamagryso2.pl@gmail.com") {
-        window.location.href="/"
-      } 
-    });
-    return () => unsubscribe();
-  }, []);
+      if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
+        window.location.href = "/"
+      }
+    })
+    return () => unsubscribe()
+  }, [])
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
     {/* Background Blobs */}

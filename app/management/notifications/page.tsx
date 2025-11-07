@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { ArrowLeft, Send, Bell, X } from "lucide-react"
@@ -10,6 +10,7 @@ import axios from "axios"
 import { OfflineBanner } from "@/components/offline-banner"
 import { ErrorToast } from "@/components/error-toast"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
+import { auth } from "@/lib/firebase"
 
 interface NotificationData {
   title: string
@@ -87,7 +88,14 @@ export default function NotificationsPage() {
       [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }))
   }
-
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
+        window.location.href = "/"
+      }
+    })
+    return () => unsubscribe()
+  }, [])
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       <OfflineBanner />

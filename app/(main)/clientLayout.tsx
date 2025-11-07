@@ -17,7 +17,7 @@ export default function ClientLayout({
   const [showWorkerOptions, setShowWorkerOptions] = useState<boolean>(false)
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user?.email === "malgorzatamagryso2.pl@gmail.com") {
+      if (user?.email === "malgorzatamagryso2.pl@gmail.com"||user?.email==="vapeme123321@gmail.com") {
         setShowWorkerOptions(true)
       } else {
         setShowWorkerOptions(false)

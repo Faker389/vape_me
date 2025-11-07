@@ -263,7 +263,7 @@ export default function AddProductPage() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user?.email !== "malgorzatamagryso2.pl@gmail.com") {
+      if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
         window.location.href = "/"
       }
     })

@@ -41,7 +41,7 @@ export default function LoginForm() {
         setErrorMessage("Błąd podczas logowania spróbuj ponownie później")
         return
       }
-      if (user.email!.trim() !== "malgorzatamagryso2.pl@gmail.com") {
+      if (user.email!.trim() !== "malgorzatamagryso2.pl@gmail.com"||user.email?.trim()!=="vapeme123321@gmail.com") {
         logOut()
       }
       window.location.href = "/"

@@ -70,7 +70,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      setShowWorkerOptions(user?.email === "malgorzatamagryso2.pl@gmail.com")
+      setShowWorkerOptions(user?.email === "malgorzatamagryso2.pl@gmail.com"||user?.email==="vapeme123321@gmail.com")
     })
     return () => unsubscribe()
   }, [])
