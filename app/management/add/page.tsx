@@ -109,8 +109,9 @@ export default function AddProductPage() {
     setFormData({ ...formData, specifications: updatedSpecs })
   }
   const handleInputChange = (field: keyof productTemp, value: ProductFieldValue) => {
-    if (field === "id" && typeof value === "number") {
-      checkIfExists(value)
+    console.log(typeof value)
+    if (field === "id" && typeof value === "string") {
+      checkIfExists(parseInt(value))
       return
     }
   
@@ -201,38 +202,49 @@ export default function AddProductPage() {
       let imageUrl = formData.image;
       const storageRef = ref(storage, `products/${formData.id}.webp`);
   
-      // Determine source image
+      // 1️⃣ Get image blob (from file upload or external URL)
       let fileBlob: Blob | null = null;
       if (formData.imageFile) {
-        fileBlob = (formData).imageFile;
+        fileBlob = formData.imageFile;
       } else if (formData.image && formData.image.trim() !== "") {
-        try{
-
+        try {
           const res = await fetch("/api/download-image", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url: formData.image }),
           });
+          if (!res.ok) throw new Error("Image download failed");
           fileBlob = await res.blob();
-        }catch(e){
-          console.log(e)
+        } catch (e) {
+          console.error("❌ Failed to download image:", e);
         }
       }
   
-      // If removeBG is true, send the image through remove.bg
+      // 2️⃣ Try to remove background (if requested)
       if (removeBG && fileBlob) {
-        const formDataBg = new FormData();
-        formDataBg.append("file", fileBlob, "input.png");
+        try {
+          const formDataBg = new FormData();
+          formDataBg.append("file", fileBlob, "input.png");
   
-        // Option 1: if using API route for URL, just send file as blob
-        const bgRes = await fetch("/api/remove_bg", {
-          method: "POST",
-          body: fileBlob, // you can wrap in FormData if needed
-        });
-        fileBlob = await bgRes.blob();
+          const bgRes = await fetch("/api/remove_bg", {
+            method: "POST",
+            body: formDataBg,
+          });
+  
+          if (!bgRes.ok) throw new Error("Background removal failed");
+  
+          const bgBlob = await bgRes.blob();
+          if (bgBlob && bgBlob.size > 0) {
+            fileBlob = bgBlob; // replace with processed image
+          } else {
+            console.warn("⚠️ Empty response from remove_bg. Using original image.");
+          }
+        } catch (err) {
+          console.warn("⚠️ Failed to remove background. Using original image.", err);
+        }
       }
   
-      // Upload final image to Firebase
+      // 3️⃣ Upload image (original or processed) to Firebase Storage
       if (fileBlob) {
         await uploadBytes(storageRef, fileBlob);
         imageUrl = await getDownloadURL(storageRef);
@@ -240,23 +252,26 @@ export default function AddProductPage() {
         imageUrl = "";
       }
   
+      // 4️⃣ Save product info
       const productData = { ...formData, image: imageUrl };
       delete productData.imageFile;
   
       if (isNew.current) await addProduct(productData);
       else await updateProduct(productData.id, productData);
   
+      // 5️⃣ Reset form + state
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       setFormData(initialForm);
       setLocation("location1");
       setRemoveBG(false);
-      setFeatures([])
-      setSpecifications({})
+      setFeatures([]);
+      setSpecifications({});
     } catch (error) {
       console.error("❌ Error submitting product:", error);
     }
   };
+  
   
 
  
