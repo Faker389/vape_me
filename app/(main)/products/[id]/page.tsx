@@ -1,15 +1,53 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { AnimatePresence, motion } from "framer-motion"
-import { useParams } from "next/navigation"
+import { useParams } from 'next/navigation'
 import { useProductsStore } from "@/lib/storage"
 import type { ProductForm } from "@/lib/productModel"
-import { Loader2, X } from "lucide-react"
+import { Loader2, X } from 'lucide-react'
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 
 export const dynamic = "force-dynamic"
+
+const RelatedProductCard = ({ product }: { product: ProductForm }) => (
+  <Link href={`/products/${product.id}`}>
+    <motion.div
+      whileHover={{ y: -10 }}
+      className="glass-effect rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-white/10"
+    >
+      <div className="h-40 md:h-48 bg-gradient-to-br from-purple-900/30 to-pink-900/30 flex items-center justify-center p-4">
+        <Image
+          src={product.image || "/placeholder.svg"}
+          alt={product.name}
+          width={192}
+          height={192}
+          className="h-full w-auto object-contain"
+          loading="lazy"
+          quality={75}
+        />
+      </div>
+      <div className="p-3 md:p-4">
+        <h3 className="font-bold mb-2 truncate text-sm md:text-base">{product.name}</h3>
+        <div className="text-lg md:text-xl font-bold gradient-text">{product.price} zł</div>
+        <div className="flex flex-wrap gap-1 md:gap-2 mt-2">
+          {product.isNew && (
+            <span className="inline-block text-xs px-2 py-1 bg-purple-500/20 rounded-full text-purple-300">
+              NOWOŚĆ
+            </span>
+          )}
+          {product.isBestseller && (
+            <span className="inline-block text-xs px-2 py-1 bg-orange-500/20 rounded-full text-orange-300">
+              BESTSELLER
+            </span>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  </Link>
+)
 
 export default function ProductDetailPage() {
   const [mounted, setMounted] = useState(false);
@@ -22,7 +60,6 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<ProductForm>()
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const { products, listenToProducts } = useProductsStore()
-  const [relatedProducts, setRelatedProducts] = useState<ProductForm[]>([])
   const isOnline = useOnlineStatus()
 
   useEffect(() => {
@@ -34,19 +71,18 @@ export default function ProductDetailPage() {
     setProduct(prod[0])
   }, [products, id])
 
-  useEffect(() => {
-    if (product && products.length > 0) {
-      const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4)
+  const relatedProducts = useMemo(() => {
+    if (!product || products.length === 0) return []
+    
+    const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4)
 
-      if (related.length < 4) {
-        const otherProducts = products
-          .filter((p) => p.id !== product.id && p.category !== product.category)
-          .slice(0, 4 - related.length)
-        setRelatedProducts([...related, ...otherProducts])
-      } else {
-        setRelatedProducts(related)
-      }
+    if (related.length < 4) {
+      const otherProducts = products
+        .filter((p) => p.id !== product.id && p.category !== product.category)
+        .slice(0, 4 - related.length)
+      return [...related, ...otherProducts]
     }
+    return related
   }, [product, products])
 
   const truncateText = (text: string, maxLength = 150) => {
@@ -84,10 +120,14 @@ export default function ProductDetailPage() {
                     animate={{ scale: 1, opacity: 1 }}
                     className="h-full flex items-center justify-center"
                   >
-                    <img
+                    <Image
                       src={product.image || "/placeholder.svg"}
                       className="h-full w-auto object-contain"
-                      alt="Product image"
+                      alt={product.name}
+                      width={384}
+                      height={384}
+                      priority
+                      quality={85}
                     />
                   </motion.div>
 
@@ -212,7 +252,7 @@ export default function ProductDetailPage() {
               </motion.div>
             )}
 
-            {product.specifications && (
+            {product.specifications&&Object.entries(product.specifications).length > 0&& (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -248,36 +288,7 @@ export default function ProductDetailPage() {
               <h2 className="text-3xl md:text-4xl font-bold gradient-text mb-6 md:mb-8">Podobne Produkty</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                 {relatedProducts.map((relatedProduct) => (
-                  <Link key={relatedProduct.id} href={`/products/${relatedProduct.id}`}>
-                    <motion.div
-                      whileHover={{ y: -10 }}
-                      className="glass-effect rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-white/10"
-                    >
-                      <div className="h-40 md:h-48 bg-gradient-to-br from-purple-900/30 to-pink-900/30 flex items-center justify-center p-4">
-                        <img
-                          src={relatedProduct.image || "/placeholder.svg"}
-                          alt={relatedProduct.name}
-                          className="h-full w-auto object-contain"
-                        />
-                      </div>
-                      <div className="p-3 md:p-4">
-                        <h3 className="font-bold mb-2 truncate text-sm md:text-base">{relatedProduct.name}</h3>
-                        <div className="text-lg md:text-xl font-bold gradient-text">{relatedProduct.price} zł</div>
-                        <div className="flex flex-wrap gap-1 md:gap-2 mt-2">
-                          {relatedProduct.isNew && (
-                            <span className="inline-block text-xs px-2 py-1 bg-purple-500/20 rounded-full text-purple-300">
-                              NOWOŚĆ
-                            </span>
-                          )}
-                          {relatedProduct.isBestseller && (
-                            <span className="inline-block text-xs px-2 py-1 bg-orange-500/20 rounded-full text-orange-300">
-                              BESTSELLER
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  </Link>
+                  <RelatedProductCard key={relatedProduct.id} product={relatedProduct} />
                 ))}
               </div>
             </motion.div>

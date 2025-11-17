@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion"
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
-import { X } from "lucide-react"
+import { X } from 'lucide-react'
+import { auth } from "@/lib/firebase"
 export const dynamic = 'force-dynamic'
 
 export default function Home() {
@@ -20,49 +22,44 @@ export default function Home() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
   const { products, listenToProducts } = useProductsStore()
-  const [bestsellers, setBestsellers] = useState<ProductForm[]>([])
-  const [newProducts, setNewProducts] = useState<ProductForm[]>([])
   const isOnline = useOnlineStatus();
+  const [showWorkerOptions,setShowWorkerOptions]=useState<boolean>(false)
 
-  
+  useEffect(()=>{
+    listenToProducts()
+  },[listenToProducts])
   useEffect(() => {
     setIsVisible(true)
-    listenToProducts()
-  }, [listenToProducts])
+  }, [])
 
-  // Generate bestsellers list
-  useEffect(() => {
-    if (products.length > 0) {
-      const bestsellerProducts = products.filter(p => p.isBestseller)
-      
-      // If we have less than 20 bestsellers, fill with other products
-      if (bestsellerProducts.length < 20) {
-        const otherProducts = products
-          .filter(p => !p.isBestseller)
-          .slice(0, 20 - bestsellerProducts.length)
-        setBestsellers([...bestsellerProducts, ...otherProducts])
-      } else {
-        setBestsellers(bestsellerProducts.slice(0, 20))
-      }
+  const bestsellers = useMemo(() => {
+    if (products.length === 0) return []
+    
+    const bestsellerProducts = products.filter(p => p.isBestseller)
+    
+    if (bestsellerProducts.length < 20) {
+      const otherProducts = products
+        .filter(p => !p.isBestseller)
+        .slice(0, 20 - bestsellerProducts.length)
+      return [...bestsellerProducts, ...otherProducts]
     }
+    return bestsellerProducts.slice(0, 20)
   }, [products])
 
-  // Generate new products list
-  useEffect(() => {
-    if (products.length > 0) {
-      const newProductsList = products.filter(p => p.isNew)
-      
-      // If we have less than 20 new products, fill with other products
-      if (newProductsList.length < 20) {
-        const otherProducts = products
-          .filter(p => !p.isNew)
-          .slice(0, 20 - newProductsList.length)
-        setNewProducts([...newProductsList, ...otherProducts])
-      } else {
-        setNewProducts(newProductsList.slice(0, 20))
-      }
+  const newProducts = useMemo(() => {
+    if (products.length === 0) return []
+    
+    const newProductsList = products.filter(p => p.isNew)
+    
+    if (newProductsList.length < 20) {
+      const otherProducts = products
+        .filter(p => !p.isNew)
+        .slice(0, 20 - newProductsList.length)
+      return [...newProductsList, ...otherProducts]
     }
+    return newProductsList.slice(0, 20)
   }, [products])
+
   if (!mounted) return null;
   return (
     <>
@@ -126,7 +123,7 @@ export default function Home() {
               transition={{ delay: 0.6 }}
               className="flex flex-wrap gap-4 w-fit"
             >
-              <a href="/vape_me.apk" className="cursor-pointer">
+              <a href="/vape me.apk" className="cursor-pointer">
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)" }}
                   whileTap={{ scale: 0.95 }}
@@ -386,18 +383,12 @@ export default function Home() {
   )
 }
 
-
-function InfiniteScrollSection({
-  title,
-  subtitle,
-  direction,
-  products,
-}: {
+const InfiniteScrollSection = ({ title, subtitle, direction, products }: {
   title: string
   subtitle: string
   direction: "left" | "right"
   products: ProductForm[]
-}) {
+}) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
   const springX = useSpring(x, { stiffness: 100, damping: 30, mass: 0.5 })
@@ -443,21 +434,21 @@ function InfiniteScrollSection({
     }
   }, [x, direction, totalWidth, isPaused])
 
-  const handleTouchStart = () => {
+  const handleTouchStart = useCallback(() => {
     setIsPaused(true)
-  }
+  }, [])
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     setIsPaused(false)
-  }
+  }, [])
 
-  const handleDragStart = () => {
+  const handleDragStart = useCallback(() => {
     setIsPaused(true)
-  }
+  }, [])
 
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
     setIsPaused(false)
-  }
+  }, [])
 
   return (
     <section className="pb-20 relative overflow-hidden">
@@ -498,10 +489,14 @@ function InfiniteScrollSection({
               >
                 <div className="h-64 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden p-4">
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <img
+                    <Image
                       src={product.image || "/placeholder.svg"}
                       alt={product.name}
+                      width={256}
+                      height={256}
                       className="h-full w-auto object-contain"
+                      loading="lazy"
+                      quality={75}
                     />
                   </div>
                   {product.isBestseller && (

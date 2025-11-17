@@ -41,8 +41,9 @@ export default function ClientLayout({
                   alt="Vape Me Logo"
                   width={110}
                   height={110}
-                  className="w-3xs h-2xl mt-[-10px] object-contain"
+                  className=" mt-[-10px] object-contain"
                 />
+
               </div>
             </motion.div>
           </Link>
