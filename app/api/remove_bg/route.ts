@@ -1,5 +1,18 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+
+interface RemoveBgError {
+  errors?: Array<{
+    title?: string;
+    detail?: string;
+  }>;
+}
+
+interface RemoveBgRequestBody {
+  image_file_b64?: string;
+  image_url?: string;
+  size: string;
+}
 
 export async function POST(req: Request) {
   try {
@@ -13,8 +26,8 @@ export async function POST(req: Request) {
       );
     }
 
-    let requestBody;
-    let headers: Record<string, string> = {
+    let requestBody: RemoveBgRequestBody;
+    const headers: Record<string, string> = {
       "X-Api-Key": apiKey,
     };
 
@@ -81,25 +94,27 @@ export async function POST(req: Request) {
         "Content-Type": "image/png",
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     // Decode error buffer if present
     let errorMessage = "Failed to remove background";
     
-    if (error.response?.data) {
+    if (error instanceof AxiosError && error.response?.data) {
       try {
-        const errorText = Buffer.from(error.response.data).toString('utf-8');
+        const errorText = Buffer.from(error.response.data as ArrayBuffer).toString('utf-8');
         console.error("RemoveBG API Error:", errorText);
-        const errorJson = JSON.parse(errorText);
+        const errorJson: RemoveBgError = JSON.parse(errorText);
         errorMessage = errorJson.errors?.[0]?.title || errorMessage;
-      } catch (e) {
+      } catch (parseError) {
         console.error("RemoveBG Error:", error);
       }
+    } else if (error instanceof Error) {
+      console.error("RemoveBG Error:", error.message);
     }
 
     return NextResponse.json(
       { 
         error: errorMessage,
-        details: error.message 
+        details: error instanceof Error ? error.message : "Unknown error"
       },
       { status: 500 }
     );

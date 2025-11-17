@@ -76,7 +76,7 @@ export default function ClientLayout({
               </Link>
             )}
 
-            <a href="/vape_me.apk">
+            <a href="/vape me.apk">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
