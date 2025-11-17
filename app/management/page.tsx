@@ -9,6 +9,7 @@ import { OfflineBanner } from "@/components/offline-banner"
 export const dynamic = 'force-dynamic'
 
 export default function ManagementPage() {
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {

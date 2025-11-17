@@ -27,6 +27,11 @@ interface Alert {
   type: 'error' | 'success' | 'warning'
 }
 export default function NotificationsPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [formData, setFormData] = useState<NotificationData>({
     title: "",
     message: "",
@@ -122,6 +127,7 @@ export default function NotificationsPage() {
     })
     return () => unsubscribe()
   }, [])
+  if (!mounted) return null;
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       <OfflineBanner />

@@ -14,6 +14,11 @@ const cbdOptions = ["Wszystkie", "Z CBD", "Bez CBD"]
 export const dynamic = "force-dynamic"
 
 export default function ProductsPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [brands, setBrands] = useState<string[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>("")
@@ -267,7 +272,7 @@ export default function ProductsPage() {
       </motion.button>
     </div>
   )
-
+  if (!mounted) return null;
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">

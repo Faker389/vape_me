@@ -4,7 +4,7 @@
   import { AnimatePresence, motion } from "framer-motion"
   import Link from "next/link"
   import Image from "next/image"
-  import { ArrowLeft, CheckCircle, XCircle, ShoppingCart, Tag, CreditCard, X, AlertCircle } from "lucide-react"
+  import { ArrowLeft, CheckCircle, XCircle, ShoppingCart, Tag, CreditCard, X, AlertCircle, Plus } from "lucide-react"
   import { auth, currentDate, db, transactions } from "@/lib/firebase"
   import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
   import { arrayUnion, collection, doc, getDoc, getDocs, where, increment, query, updateDoc, writeBatch } from "firebase/firestore"
@@ -12,7 +12,6 @@
   import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
-import { s } from "framer-motion/client"
 
   interface ScannedItem {
     id: number
@@ -39,13 +38,21 @@ import { s } from "framer-motion/client"
     type: 'error' | 'success' | 'warning'
   }
   export default function TransactionPage() {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+  
     const [userScanned, setUserScanned] = useState<string|null>(null)
     const [searchQuery, setSearchQuery] =useState<string>("")
     const [scannedItems, setScannedItems] = useState<ScannedItem[]>([])
     const [scannedCoupons, setscannedCoupons] = useState<ScannedCoupon[]>([])
     const { products, listenToProducts } = useProductsStore()
     const currentLocation = useRef<string>("location1")
-    const [alerts, setAlerts] = useState<Alert[]>([])
+    const [alerts, setAlerts] = useState<Alert[]>([]) 
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [focused,setFocused]=useState<boolean>(false)
     const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
       const newAlert: Alert = {
         id: crypto.randomUUID(),
@@ -76,7 +83,7 @@ import { s } from "framer-motion/client"
             }])
         }
       } catch(err) {
-        console.log(err)
+        showAlert("Błąd pobierania produktu", "error")
       }
     }
 
@@ -99,16 +106,15 @@ import { s } from "framer-motion/client"
               discountamount: data.discountamount ?? 0,
             }])
           } else {
-            console.log("No such coupon for this user!");
+            showAlert("Podany użytkownik nie posiada danego kuponu","warning")
           }
         }
       } catch(err) {
-        console.log(err)
+        showAlert("Błąd pobierania kuponu", "error")
       }
     }
 
     async function checkIfExists(userID: string) {
-      try {
         if (userID) {
           const docRef = doc(db, "users", userID);
           const docSnap = await getDoc(docRef);
@@ -119,9 +125,6 @@ import { s } from "framer-motion/client"
             setUserScanned(null)
           }
         }
-      } catch(err) {
-        console.log(err)
-      }
     }
       
     useBarcodeScanner((code) => {
@@ -193,7 +196,6 @@ import { s } from "framer-motion/client"
           });
           return true;
         } catch (error) {
-          console.error("Error updating user:", error);
           showAlert("Wystąpił błąd podczas aktualizacji użytkownika", "error")  
           return false;
         }
@@ -287,7 +289,16 @@ import { s } from "framer-motion/client"
         }
       }
     }
-
+    useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+        if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
+          setFocused(false);
+        }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+  
     useEffect(() => {
       const unsubscribe = auth.onAuthStateChanged((user) => {
         if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
@@ -307,6 +318,8 @@ import { s } from "framer-motion/client"
           return 'bg-red-600 border-red-400'
       }
     }
+    if (!mounted) return null; 
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
         {/* Animated Background */}
@@ -412,17 +425,28 @@ import { s } from "framer-motion/client"
               <ShoppingCart className="w-6 h-6 text-purple-400" />
               <h2 className="text-2xl font-bold text-white">Zeskanowane produkty</h2>
             </div>
-            <div className="mb-4">
-                    <input
-                      type="text"
-                      placeholder="Szukaj produktu po ID lub nazwie..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full rounded-2xl px-4 py-3 bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-xl border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-500"
-                    />
-                  </div>
+            <div className="mb-4 relative">
+              <input
+                type="text"
+                ref={inputRef}
+                onFocus={()=>setFocused(true)}
+                placeholder="Szukaj produktu po ID lub nazwie..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl pl-4 pr-12 py-3 bg-gradient-to-br from-purple-600/20 to-pink-600/20
+                          backdrop-blur-xl border border-white/10 text-white placeholder-white/50 
+                          focus:outline-none focus:ring-2 focus:ring-pink-500"
+              />
+            
+              {/* Icon inside input */}
+              <Plus
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white opacity-80 cursor-pointer"
+                size={20}
+                onClick={()=>{fetchProduct(searchQuery.toString());setSearchQuery("")}}
+              />
+            </div>
                   <div>
-                    {isOnline&&searchQuery.length>0&&products.filter((e)=>e.id.toString().includes(searchQuery)).slice(0,5).map((product,index)=>{
+                    {isOnline&&focused&&searchQuery.length>0&&products.filter((e)=>e.id.toString().includes(searchQuery)).slice(0,5).map((product,index)=>{
                       return <motion.div
                       key={product.id}
                       initial={{ opacity: 0, x: -20 }}

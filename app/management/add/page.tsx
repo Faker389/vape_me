@@ -63,6 +63,11 @@ const initialForm: ProductForm = {
 }
 
 export default function AddProductPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [formData, setFormData] = useState<ProductForm>(initialForm)
   const [success, setSuccess] = useState(false)
   const [removeBG,setRemoveBG]=useState<boolean>(false)
@@ -75,7 +80,10 @@ export default function AddProductPage() {
   const [newSpecValue, setNewSpecValue] = useState("")
   const { products, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus();
+  const [focused, setFocused] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([])
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
     const newAlert: Alert = {
       id: crypto.randomUUID(),
@@ -89,6 +97,14 @@ export default function AddProductPage() {
       setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
     }, 3000)
   }
+  const categories = products.reduce((prev:string[],item:productTemp)=>{
+    if(!prev.includes(item.category)){
+      prev.push(item.category)
+    }
+    return prev;
+  },[]).filter(cat =>
+    cat.toLowerCase().includes(formData.category.toLowerCase())
+  )
   const getAlertStyles = (type: 'error' | 'success' | 'warning') => {
     switch (type) {
       case 'success':
@@ -139,7 +155,6 @@ export default function AddProductPage() {
     setFormData({ ...formData, specifications: updatedSpecs })
   }
   const handleInputChange = (field: keyof productTemp, value: ProductFieldValue) => {
-    console.log(typeof value)
     if (field === "id" && typeof value === "string") {
       checkIfExists(parseInt(value))
       return
@@ -309,7 +324,16 @@ export default function AddProductPage() {
     })
     return () => unsubscribe()
   }, [])
-
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
+        setFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  if (!mounted) return null;
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
     {/* Background Blobs */}
@@ -417,7 +441,6 @@ export default function AddProductPage() {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    console.log(file)
                     setFormData({ ...formData, imageFile: file }); // temporary field for upload
                   }
                 }}
@@ -456,24 +479,54 @@ export default function AddProductPage() {
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value.trim())}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
                 placeholder="Np. ELFBAR 600"
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Kategoria *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.category}
-                  onChange={(e) => handleInputChange("category", e.target.value.trim())}
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
-                  placeholder="Np. Jednorazówki"
-                />
-              </div>
+            <div className="grid md:grid-cols-2 gap-4 ">
+            <div className="relative w-full max-w-sm">
+            <label className="block text-sm font-medium text-gray-400 mb-2">Kategoria *</label>
+            <input
+              type="text"
+              required
+              value={formData.category}
+              ref={inputRef}
+              onFocus={() => setFocused(true)}
+              onChange={(e) => handleInputChange("category", e.target.value)}
+              className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+              placeholder="Np. Jednorazówki"
+            />
+
+            {/* Suggestions Dropdown */}
+            <AnimatePresence>
+              {focused && categories.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full  w-full bg-gray-900/80 backdrop-blur-xl rounded-xl border border-white/10 max-h-64 overflow-y-auto z-50 shadow-lg"
+                >
+                  {categories.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      onClick={() => {
+                        handleInputChange("category",item);
+                        setFocused(false);
+                      }}
+                      className="bg-gray-800/50 cursor-pointer px-4 py-3 text-white hover:bg-purple-600/20 hover:border-purple-500/50 border-b border-white/10 last:border-b-0 transition-all"
+                    >
+                      {item}
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Marka *</label>
                 <input

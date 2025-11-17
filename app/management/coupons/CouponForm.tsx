@@ -106,7 +106,6 @@ export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "succ
       isDiscount: false,
       expiryDate: Timestamp.fromDate(expiryDate),
     } satisfies coupon
-    console.log("Creating item coupon:", couponData)
       await addProduct(couponData)
   }
 

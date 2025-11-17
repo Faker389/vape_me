@@ -12,6 +12,11 @@ import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 export const dynamic = "force-dynamic"
 
 export default function ProductDetailPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const params = useParams()
   const id = params.id as string
   const [product, setProduct] = useState<ProductForm>()
@@ -48,7 +53,7 @@ export default function ProductDetailPage() {
     if (text.length <= maxLength) return text
     return text.slice(0, maxLength) + "..."
   }
-
+  if (!mounted) return null;
   return (
     <>
       {product ? (

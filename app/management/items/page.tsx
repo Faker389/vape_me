@@ -29,6 +29,11 @@ interface Alert {
   type: 'error' | 'success' | 'warning'
 }
 export default function ItemsManagementPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [editingProduct, setEditingProduct] = useState<ProductForm | null>(null)
   const [formData, setFormData] = useState<ProductForm | null>(null)
   const [location, setLocation] = useState<"location1" | "location2">("location1")
@@ -54,6 +59,7 @@ export default function ItemsManagementPage() {
       setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
     }, 3000)
   }
+
   const getAlertStyles = (type: 'error' | 'success' | 'warning') => {
     switch (type) {
       case 'success':
@@ -199,6 +205,7 @@ export default function ItemsManagementPage() {
     })
     return () => unsubscribe()
   }, [])
+  if (!mounted) return null;
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
     {/* Background Blobs */}
@@ -385,7 +392,6 @@ export default function ItemsManagementPage() {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    console.log(file)
                     setFormData({ ...formData, imageFile: file }); // temporary field for upload
                   }
                 }}

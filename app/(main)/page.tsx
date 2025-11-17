@@ -10,6 +10,11 @@ import { X } from "lucide-react"
 export const dynamic = 'force-dynamic'
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [isVisible, setIsVisible] = useState(false)
   const { scrollYProgress } = useScroll()
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
@@ -58,7 +63,7 @@ export default function Home() {
       }
     }
   }, [products])
-
+  if (!mounted) return null;
   return (
     <>
       {/* Navigation */}

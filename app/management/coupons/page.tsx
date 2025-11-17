@@ -17,6 +17,11 @@ interface Alert {
   type: 'error' | 'success' | 'warning'
 }
 export default function AddCouponsPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [viewMode, setViewMode] = useState<"add-discount" | "add-item" | "manage">("add-discount")
   const [alerts, setAlerts] = useState<Alert[]>([])
 
@@ -53,7 +58,7 @@ export default function AddCouponsPage() {
     })
     return () => unsubscribe()
   }, [])
-
+  if (!mounted) return null;
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
