@@ -23,7 +23,7 @@ interface EditingCoupon extends Omit<coupon, 'pointsCost' | 'discountamount' | '
     expiryDate: string
 }
 
-export default function CouponList(){
+export default function CouponList({fkc}:{fkc:(e: string,e2:"error" | "success" | "warning")=> void}){
     const [coupons, setCoupons] = useState<coupon[]>([])
     const [editingCoupon, setEditingCoupon] = useState<EditingCoupon | null>(null)
     
@@ -33,9 +33,10 @@ export default function CouponList(){
             (snapshot) => {
                 const data = snapshot.docs.map((doc) => doc.data() as coupon)
                 setCoupons(data)
-            },
+            }
+            ,
             (error) => {
-                console.error("Error fetching coupons:", error)
+                fkc("Błąd podczas pobierania kuponów", "error")
             }
         )
         
@@ -45,9 +46,9 @@ export default function CouponList(){
     const handleDeleteCoupon = async (id: string) => {
         try {
             await deleteDoc(doc(db, "coupons", id))
-            console.log("Coupon deleted successfully")
+            fkc("Pomyślnie usunieto kupon","success")
         } catch (error) {
-            console.error("Error deleting coupon:", error)
+            fkc("Bład podczas usuwania kuponu", "error")
         }
     }
     
@@ -62,7 +63,7 @@ export default function CouponList(){
                     expiryDateString = coupon.expiryDate.toISOString().slice(0, 16);
                 }
             } catch (error) {
-                console.error("Error converting expiry date:", error);
+                fkc("Błąd podczas edytowania kuponu", "error");
             }
         }
       
@@ -92,13 +93,12 @@ export default function CouponList(){
                 try {
                     const date = new Date(editingCoupon.expiryDate);
                     if (isNaN(date.getTime())) {
-                        alert("Nieprawidłowa data wygaśnięcia");
+                        fkc("Nieprawidłowa data wygaśnięcia","error");
                         return;
                     }
                     expiryTimestamp = Timestamp.fromDate(date);
                 } catch (error) {
-                    console.error("Error converting date:", error);
-                    alert("Nieprawidłowa data wygaśnięcia");
+                    fkc("Nieprawidłowa data wygaśnięcia","error");
                     return;
                 }
             }
@@ -123,11 +123,10 @@ export default function CouponList(){
         
             await updateDoc(couponRef, updateData)
             
-            console.log("Coupon updated successfully")
+            fkc("Pomyślnie zedytowano kupon","success")
             setEditingCoupon(null)
         } catch (error) {
-            console.error("Error updating coupon:", error)
-            alert("Błąd podczas aktualizacji kuponu")
+            fkc("Błąd podczas aktualizacji kuponu","error")
         }
     }
     

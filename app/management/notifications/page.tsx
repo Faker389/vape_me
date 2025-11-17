@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { ArrowLeft, Send, Bell, X } from "lucide-react"
+import { ArrowLeft, Send, Bell, X, AlertCircle } from "lucide-react"
 import axios from "axios"
 import { OfflineBanner } from "@/components/offline-banner"
 import { ErrorToast } from "@/components/error-toast"
@@ -21,7 +21,11 @@ interface NotificationData {
   scheduledTime?: string
 }
 export const dynamic = 'force-dynamic'
-
+interface Alert {
+  id: string
+  message: string
+  type: 'error' | 'success' | 'warning'
+}
 export default function NotificationsPage() {
   const [formData, setFormData] = useState<NotificationData>({
     title: "",
@@ -34,24 +38,46 @@ export default function NotificationsPage() {
 
   const [isSending, setIsSending] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const isOnline = useOnlineStatus();
-
+    const [alerts, setAlerts] = useState<Alert[]>([])
+    const isOnline = useOnlineStatus();
+  const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
+    const newAlert: Alert = {
+      id: crypto.randomUUID(),
+      message,
+      type
+    }
+    
+    setAlerts(prev => [...prev, newAlert])
+    
+    setTimeout(() => {
+      setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
+    }, 3000)
+  }
+  const getAlertStyles = (type: 'error' | 'success' | 'warning') => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-600 border-green-400'
+      case 'warning':
+        return 'bg-yellow-600 border-yellow-400'
+      case 'error':
+      default:
+        return 'bg-red-600 border-red-400'
+    }
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!formData.title.trim() || !formData.message.trim()) {
-      setError("Tytuł i treść wiadomości są wymagane")
+      showAlert("Tytuł i treść wiadomości są wymagane","error")
       return
     }
 
     if (!navigator.onLine) {
-      setError("Brak połączenia z internetem. Sprawdź swoje połączenie i spróbuj ponownie.")
+      showAlert("Brak połączenia z internetem. Sprawdź swoje połączenie i spróbuj ponownie.","error")
       return
     }
 
     setIsSending(true)
-    setError(null)
 
     try {
       await axios.post("/api/send_notification", {
@@ -76,7 +102,7 @@ export default function NotificationsPage() {
         setShowSuccess(false)
       }, 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nie udało się wysłać powiadomienia. Spróbuj ponownie.")
+      showAlert("Nie udało się wysłać powiadomienia. Spróbuj ponownie.","error")
       setIsSending(false)
     }
   }
@@ -100,9 +126,23 @@ export default function NotificationsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       <OfflineBanner />
 
-      <AnimatePresence>
-        {error && <ErrorToast message={error} type="error" onClose={() => setError(null)} />}
-      </AnimatePresence>
+      <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
+        <AnimatePresence>
+          {alerts.map((alert) => (
+            <motion.div
+              key={alert.id}
+              initial={{ opacity: 0, x: 100, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 100, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className={`${getAlertStyles(alert.type)} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border-2`}
+            >
+              <AlertCircle className="w-6 h-6 flex-shrink-0" />
+              <span className="font-semibold">{alert.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
 
       {/* Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Percent, Package, Check, X, List } from "lucide-react"
+import { ArrowLeft, Percent, Package, Check, X, List, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { auth } from "@/lib/firebase"
 import DiscountForm from "./DiscountForm"
@@ -11,13 +11,40 @@ import CouponList from "./CouponList"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 
 export const dynamic = "force-dynamic"
-
+interface Alert {
+  id: string
+  message: string
+  type: 'error' | 'success' | 'warning'
+}
 export default function AddCouponsPage() {
   const [viewMode, setViewMode] = useState<"add-discount" | "add-item" | "manage">("add-discount")
-  const [showSuccess, setShowSuccess] = useState(false)
+  const [alerts, setAlerts] = useState<Alert[]>([])
 
   const isOnline = useOnlineStatus()
-
+  const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
+    const newAlert: Alert = {
+      id: crypto.randomUUID(),
+      message,
+      type
+    }
+    
+    setAlerts(prev => [...prev, newAlert])
+    
+    setTimeout(() => {
+      setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
+    }, 3000)
+  }
+  const getAlertStyles = (type: 'error' | 'success' | 'warning') => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-600 border-green-400'
+      case 'warning':
+        return 'bg-yellow-600 border-yellow-400'
+      case 'error':
+      default:
+        return 'bg-red-600 border-red-400'
+    }
+  }
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
@@ -41,7 +68,23 @@ export default function AddCouponsPage() {
           transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         />
       </div>
-
+      <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
+        <AnimatePresence>
+          {alerts.map((alert) => (
+            <motion.div
+              key={alert.id}
+              initial={{ opacity: 0, x: 100, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 100, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className={`${getAlertStyles(alert.type)} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border-2`}
+            >
+              <AlertCircle className="w-6 h-6 flex-shrink-0" />
+              <span className="font-semibold">{alert.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
       <div className="relative z-10 p-4 md:p-8">
         <div className="mb-8">
           <Link href="/management">
@@ -116,31 +159,17 @@ export default function AddCouponsPage() {
           <AnimatePresence mode="wait">
             {isOnline ? (
               viewMode == "add-discount" ? (
-                <DiscountForm fkc={setShowSuccess} />
+                <DiscountForm fkc={showAlert} />
               ) : viewMode == "add-item" ? (
-                <CouponForm fkc={setShowSuccess} />
+                <CouponForm fkc={showAlert} />
               ) : (
-                <CouponList />
+                <CouponList fkc={showAlert} />
               )
             ) : (
               ""
             )}
           </AnimatePresence>
         </div>
-
-        <AnimatePresence>
-          {showSuccess && (
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              className="fixed bottom-8 right-4 md:right-8 bg-green-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl shadow-2xl flex items-center gap-3"
-            >
-              <Check className="w-5 md:w-6 h-5 md:h-6" />
-              <span className="font-bold text-sm md:text-base">Kupon został utworzony!</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         <AnimatePresence>
           {!isOnline && (

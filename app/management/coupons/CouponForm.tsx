@@ -46,7 +46,7 @@ const selectedForm = {
   description: "",
 }
 
-export default function CouponForm({ fkc }: { fkc: (e: boolean) => void }) {
+export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "success" | "warning") => void }) {
   const [discountForm, setDiscountForm] = useState<formCoupon>(initialform)
   const [selectedProduct, setSelectedProduct] = useState<ProductForm>(selectedForm)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -84,9 +84,9 @@ export default function CouponForm({ fkc }: { fkc: (e: boolean) => void }) {
     try {
       const productRef = doc(db, "coupons", product.id.toString())
       await setDoc(productRef, product)
-      console.log("Product added with ID:", product.id)
+      fkc("Pomyślnie dodano kupon:", "success")
     } catch (error) {
-      console.error("Error adding product:", error)
+      fkc("Bład podczas dodawania kuponu","error")
     }
   }
 
@@ -107,22 +107,7 @@ export default function CouponForm({ fkc }: { fkc: (e: boolean) => void }) {
       expiryDate: Timestamp.fromDate(expiryDate),
     } satisfies coupon
     console.log("Creating item coupon:", couponData)
-    try {
       await addProduct(couponData)
-      setTimeout(() => {
-        setIsSubmitting(false)
-        fkc(true)
-        setDiscountForm(initialform)
-        setTimeout(() => fkc(false), 3000)
-      }, 1000)
-    } catch (err) {
-      console.log(err)
-      setTimeout(() => {
-        setIsSubmitting(false)
-        fkc(false)
-        setDiscountForm(initialform)
-      }, 1000)
-    }
   }
 
   return (

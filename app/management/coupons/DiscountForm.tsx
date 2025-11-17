@@ -38,7 +38,7 @@ interface coupon {
     imageUrl: "",
   }
 
-export default function DiscountForm({fkc}:{fkc:(e:boolean)=> void}){
+export default function DiscountForm({fkc}:{fkc:(e: string,e2:"error" | "success" | "warning")=> void}){
     const [discountForm, setDiscountForm] = useState<formCoupon>(initialform)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -46,9 +46,9 @@ export default function DiscountForm({fkc}:{fkc:(e:boolean)=> void}){
         try {
           const productRef = doc(db, "coupons", product.id.toString())
           await setDoc(productRef, product)
-          console.log("Product added with ID:", product.id)
+          fkc("Kupon pomyślnie dodany", "success")
         } catch (error) {
-          console.error("Error adding product:", error)
+          fkc("Error adding product:", "error")
         }
       }
 
@@ -69,22 +69,7 @@ export default function DiscountForm({fkc}:{fkc:(e:boolean)=> void}){
           minimalPrice: discountForm.minimalPrice,
           expiryDate,
         } satisfies coupon;
-        try{
           await addProduct(couponData);
-          setTimeout(() => {
-            setIsSubmitting(false)
-            fkc(true)
-            setDiscountForm(initialform)
-            setTimeout(() => fkc(false), 3000)
-          }, 1000)
-        }catch(err){
-          console.log(err)
-          setTimeout(() => {
-            setIsSubmitting(false)
-            fkc(false)
-            setDiscountForm(initialform)
-          }, 1000)
-        }
       }
     return<motion.div
     key="discount"

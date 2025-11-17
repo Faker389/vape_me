@@ -4,7 +4,7 @@ import { useState,useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowLeft, Edit, X, Save, Upload, Plus } from "lucide-react"
+import { ArrowLeft, Edit, X, Save, Upload, Plus, AlertCircle } from "lucide-react"
 import { auth, db, storage } from "@/lib/firebase"
 import {  doc, updateDoc } from "firebase/firestore"
 import { ProductForm } from "@/lib/productModel"
@@ -23,20 +23,48 @@ type ProductFieldValue =
 
 // Demo data
 export const dynamic = 'force-dynamic'
-
+interface Alert {
+  id: string
+  message: string
+  type: 'error' | 'success' | 'warning'
+}
 export default function ItemsManagementPage() {
   const [editingProduct, setEditingProduct] = useState<ProductForm | null>(null)
   const [formData, setFormData] = useState<ProductForm | null>(null)
   const [location, setLocation] = useState<"location1" | "location2">("location1")
   const { products, listenToProducts } = useProductsStore()
   const [searchQuery, setSearchQuery] = useState<string>("")
-  const [features, setFeatures] = useState<string[]>([])
+    const [alerts, setAlerts] = useState<Alert[]>([])
+    const [features, setFeatures] = useState<string[]>([])
   const [specifications, setSpecifications] = useState<Record<string, string>>({})
   const [newFeature, setNewFeature] = useState("")
   const [newSpecKey, setNewSpecKey] = useState("")
   const [newSpecValue, setNewSpecValue] = useState("")
   const isOnline = useOnlineStatus();
-
+  const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
+    const newAlert: Alert = {
+      id: crypto.randomUUID(),
+      message,
+      type
+    }
+    
+    setAlerts(prev => [...prev, newAlert])
+    
+    setTimeout(() => {
+      setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
+    }, 3000)
+  }
+  const getAlertStyles = (type: 'error' | 'success' | 'warning') => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-600 border-green-400'
+      case 'warning':
+        return 'bg-yellow-600 border-yellow-400'
+      case 'error':
+      default:
+        return 'bg-red-600 border-red-400'
+    }
+  }
   const filteredProducts = products&&products.filter(e => {
     const query = searchQuery.toLowerCase().trim()
     return (
@@ -98,9 +126,9 @@ export default function ItemsManagementPage() {
     try {
       const productRef = doc(db, "products", productId); // reference to the doc
       await updateDoc(productRef, updatedData); // update fields
-      console.log("Product updated successfully");
+      showAlert("Product updated successfully","success");
     } catch (error) {
-      console.error("Error updating product:", error);
+      showAlert("Error updating product:", "error");
     }
   }
 
@@ -113,17 +141,15 @@ export default function ItemsManagementPage() {
       // === CASE 1: User selected a local file ===
       if (formData.imageFile) {
         const file = formData.imageFile as File;
-        console.log("📸 Uploading local file:", file.name);
   
         // Upload file directly to Firebase Storage
         await uploadBytes(storageRef, file);
         imageUrl = await getDownloadURL(storageRef);
-        console.log("✅ Uploaded local file:", imageUrl);
+        showAlert("Zaimportowano zdjecie", "success");
       }
   
       // === CASE 2: User provided an image URL ===
       else if (formData.image && formData.image.trim() !== ""&&!formData.image.includes("firebase")) {
-        console.log("🌐 Downloading image from URL:", formData.image);
   
         // Fetch the image as blob
         const res = await fetch("/api/download-image", {
@@ -135,12 +161,12 @@ export default function ItemsManagementPage() {
         // Upload fetched blob to Firebase Storage
         await uploadBytes(storageRef, blob);
         imageUrl = await getDownloadURL(storageRef);
-        console.log("✅ Uploaded from URL:", imageUrl);
+        showAlert("Zaimportowano zdjecie", "success");
       }
   
       // === CASE 3: No image at all ===
       else {
-        console.warn("⚠️ No image provided. Skipping image upload.");
+        showAlert("⚠️ No image provided. Skipping image upload.","warning");
         imageUrl = "";
       }
   
@@ -155,8 +181,9 @@ export default function ItemsManagementPage() {
       
       setFormData(null);
       setLocation("location1");
+      showAlert("Wszystkie działania sie powiodły","success")
     } catch (error) {
-      console.error("❌ Error submitting product:", error);
+      showAlert("Nie udało sie zapiasć produktu", "error");
     }
   };
   const handleInputChange = (field: keyof ProductForm, value: ProductFieldValue) => {
@@ -188,7 +215,23 @@ export default function ItemsManagementPage() {
       />
     </div>
 
-
+    <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
+        <AnimatePresence>
+          {alerts.map((alert) => (
+            <motion.div
+              key={alert.id}
+              initial={{ opacity: 0, x: 100, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 100, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className={`${getAlertStyles(alert.type)} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border-2`}
+            >
+              <AlertCircle className="w-6 h-6 flex-shrink-0" />
+              <span className="font-semibold">{alert.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
       {/* Navigation */}
       <nav className="relative border-b border-white/10 backdrop-blur-xl bg-gray-900/50">
         <div className="container mx-auto px-4 py-4">

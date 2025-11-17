@@ -4,7 +4,7 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
-import { ArrowLeft, Plus, Save, Upload, X } from "lucide-react"
+import { AlertCircle, ArrowLeft, Plus, Save, Upload, X } from "lucide-react"
 import { auth, db, storage } from "@/lib/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
@@ -36,6 +36,12 @@ interface productTemp{
     description:string;
     quantity?:string;
     location?:string
+}
+
+interface Alert {
+  id: string
+  message: string
+  type: 'error' | 'success' | 'warning'
 }
 export const dynamic = 'force-dynamic'
 
@@ -69,7 +75,31 @@ export default function AddProductPage() {
   const [newSpecValue, setNewSpecValue] = useState("")
   const { products, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus();
-
+  const [alerts, setAlerts] = useState<Alert[]>([])
+  const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
+    const newAlert: Alert = {
+      id: crypto.randomUUID(),
+      message,
+      type
+    }
+    
+    setAlerts(prev => [...prev, newAlert])
+    
+    setTimeout(() => {
+      setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
+    }, 3000)
+  }
+  const getAlertStyles = (type: 'error' | 'success' | 'warning') => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-600 border-green-400'
+      case 'warning':
+        return 'bg-yellow-600 border-yellow-400'
+      case 'error':
+      default:
+        return 'bg-red-600 border-red-400'
+    }
+  }
   useEffect(() => {
     listenToProducts()
   }, [listenToProducts])
@@ -167,7 +197,6 @@ export default function AddProductPage() {
       isNew.current = false
       return true;
     } catch (e) {
-      console.error("Error fetching product:", e)
       setFormData({ ...initialForm, id })
       isNew.current = true
       return false
@@ -178,9 +207,9 @@ export default function AddProductPage() {
     try {
       const productRef = doc(db, "products", product.id.toString())
       await setDoc(productRef, product)
-      console.log("Product added with ID:", product.id)
+      showAlert("Pomyślnie dodano produkt", "success")
     } catch (error) {
-      console.error("Error adding product:", error)
+      showAlert("Błąd podczas dodawania produktu", "error")
     }
   }
 
@@ -190,9 +219,9 @@ export default function AddProductPage() {
   
       await updateDoc(productRef, updatedData)
   
-      console.log("Product updated successfully")
+      showAlert("Pomyślnie zmodyfikowano produkt","success")
     } catch (error) {
-      console.error("Error updating product:", error)
+      showAlert("Błąd podczas modyfikacji produktu", "error")
     }
   }
   const handleSubmit = async (e: React.FormEvent) => {
@@ -216,7 +245,7 @@ export default function AddProductPage() {
           if (!res.ok) throw new Error("Image download failed");
           fileBlob = await res.blob();
         } catch (e) {
-          console.error("❌ Failed to download image:", e);
+          showAlert("Błąd pobierania zdjęcia", "error");
         }
       }
   
@@ -237,10 +266,10 @@ export default function AddProductPage() {
           if (bgBlob && bgBlob.size > 0) {
             fileBlob = bgBlob; // replace with processed image
           } else {
-            console.warn("⚠️ Empty response from remove_bg. Using original image.");
+            showAlert("Nie udalo sie usunąć tła",'warning');
           }
         } catch (err) {
-          console.warn("⚠️ Failed to remove background. Using original image.", err);
+          showAlert("Nie udalo sie usunąć tła",'warning');
         }
       }
   
@@ -267,15 +296,11 @@ export default function AddProductPage() {
       setRemoveBG(false);
       setFeatures([]);
       setSpecifications({});
+      showAlert("Pomyślnie dodano produkt","success")
     } catch (error) {
-      console.error("❌ Error submitting product:", error);
+      showAlert("Błąd dodawania produktu", "error");
     }
   };
-  
-  
-
- 
-
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
@@ -300,7 +325,23 @@ export default function AddProductPage() {
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
       />
     </div>
-
+    <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
+        <AnimatePresence>
+          {alerts.map((alert) => (
+            <motion.div
+              key={alert.id}
+              initial={{ opacity: 0, x: 100, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 100, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className={`${getAlertStyles(alert.type)} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border-2`}
+            >
+              <AlertCircle className="w-6 h-6 flex-shrink-0" />
+              <span className="font-semibold">{alert.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
       {/* Navigation */}
       <nav className="relative border-b border-white/10 backdrop-blur-xl bg-gray-900/50">
         <div className="container mx-auto px-4 py-4">
