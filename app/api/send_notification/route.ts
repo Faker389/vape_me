@@ -7,7 +7,7 @@ if (!admin.apps.length) {
     admin.initializeApp({
       credential:   admin.credential.cert({
         projectId: process.env.NEXT_PUBLIC_project_id,
-        privateKey: process.env.NEXT_PUBLIC_private_key,
+        privateKey: process.env.NEXT_PUBLIC_private_key?.replace(/\\n/g, '\n'),
         clientEmail: process.env.NEXT_PUBLIC_client_email,
       }),
     });

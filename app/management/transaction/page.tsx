@@ -267,7 +267,6 @@ import { ProductForm } from "@/lib/productModel"
       }
     }
     const handleFinishTransaction = async() => {
-      const handleFinishTransaction = async () => {
         const resp1 = await addParamsToUser()
         if (!resp1) return
     
@@ -287,7 +286,6 @@ import { ProductForm } from "@/lib/productModel"
             setscannedCoupons([])
           }, 1000)
         }
-      }
     }
     useEffect(() => {
       function handleClickOutside(event: MouseEvent) {
