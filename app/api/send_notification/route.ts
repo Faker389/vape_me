@@ -15,8 +15,16 @@ if (!admin.apps.length) {
       }),
     });
   }
-
+const checkPermission = async(userNotifications:NotificationsSettings,notificationtype:"newsUpdates"|"pointsActivity"|"promotions")=>{
+  switch(notificationtype){
+    case "newsUpdates": return userNotifications.newsUpdates;break;
+    case "pointsActivity": return userNotifications.pointsActivity;break;
+    case "promotions": return userNotifications.promotions;break;
+    default: return false;
+  }
+}
 export async function POST(req: NextRequest) {
+
   const { userID, title, body, priority,notificationType } = await req.json();
   if (!userID || !title || !body) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -25,7 +33,7 @@ export async function POST(req: NextRequest) {
   if(!docSnap.exists) return NextResponse.json({ error: "User not found" }, { status: 400 });
   const data = docSnap.data() as UserModel;
   if (
-    !data.notifications?.pushNotifications 
+    !data.notifications?.pushNotifications ||!checkPermission(data.notifications,notificationType)
   ){
     return NextResponse.json({ error: "No permissions" }, { status: 400 });
   }

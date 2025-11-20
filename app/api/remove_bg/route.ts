@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import axios, { AxiosError } from "axios";
+import admin from "firebase-admin";
 
 interface RemoveBgError {
   errors?: Array<{
@@ -15,6 +16,14 @@ interface RemoveBgRequestBody {
 }
 
 export async function POST(req: Request) {
+  const authHeader = req.headers.get("authorization") || "";
+  const idToken = authHeader.replace("Bearer ", "");
+
+  try {
+    await admin.auth().verifyIdToken(idToken);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const contentType = req.headers.get("content-type");
     

@@ -149,9 +149,10 @@ export default function ItemsManagementPage() {
       fileBlob = formData.imageFile;
     } else if (formData.image && formData.image.trim() !== "") {
       try {
+        const token = await auth.currentUser?.getIdToken()
         const res = await fetch("/api/download-image", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json","Authorization":`Bearer ${token}` },
           body: JSON.stringify({ url: formData.image }),
         });
         if (!res.ok) throw new Error("Image download failed");
@@ -166,10 +167,13 @@ export default function ItemsManagementPage() {
       try {
         const formDataBg = new FormData();
         formDataBg.append("file", fileBlob, "input.png");
-
+        const token = await auth.currentUser?.getIdToken()
         const bgRes = await fetch("/api/remove_bg", {
           method: "POST",
           body: formDataBg,
+          headers:{
+            "Authorization":`Bearer ${token}`
+          }
         });
 
         if (!bgRes.ok) throw new Error("Background removal failed");

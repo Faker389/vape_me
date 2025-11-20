@@ -90,7 +90,10 @@ export default function ClientLayout({
         </div>
       </motion.nav>
       <AgeVerificationModal />
-      {children}
+      {/* Add pt-20 for mobile, pt-24 for tablet and up to account for fixed navbar height */}
+      <div className="pt-20 sm:pt-24">
+        {children}
+      </div>
     </main>
   )
 }

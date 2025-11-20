@@ -281,12 +281,17 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
       try {
         const data = docSnapUser.data();
           const fcmToken = data.token ?? "";
+          const token = auth.currentUser?.getIdToken()
            await axios.post("/api/send_notification", {
             title: "Otrzymujesz nowe buszki!",
             body: `Za twój ostatni zakup przyznaliśmy ci ${totalPoints} buszków!`,
             priority: "high",
             fcmToken,
             notificationType: "pointsActivity",
+          },{
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
           });
           return true;
       } catch (error) {

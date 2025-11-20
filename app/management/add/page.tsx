@@ -250,10 +250,11 @@ export default function AddProductPage() {
     if (formData.imageFile) {
       fileBlob = formData.imageFile;
     } else if (formData.image && formData.image.trim() !== "") {
+      const idToken = auth.currentUser?.getIdToken();
       try {
         const res = await fetch("/api/download-image", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json","Authorization": `Bearer ${idToken}` },
           body: JSON.stringify({ url: formData.image }),
         });
         if (!res.ok) throw new Error("Image download failed");
@@ -268,8 +269,11 @@ export default function AddProductPage() {
       try {
         const formDataBg = new FormData();
         formDataBg.append("file", fileBlob, "input.png");
-
+        const idToken = auth.currentUser?.getIdToken();
         const bgRes = await fetch("/api/remove_bg", {
+          headers:{
+            "Authorization": `Bearer ${idToken}`,
+          },
           method: "POST",
           body: formDataBg,
         });

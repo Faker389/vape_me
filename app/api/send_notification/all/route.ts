@@ -15,9 +15,17 @@ if (!admin.apps.length) {
 
   
   export async function POST(req: NextRequest) {
-    const { title, body, priority, notificationType } = await req.json();
+    const authHeader = req.headers.get("authorization") || "";
+  const idToken = authHeader.replace("Bearer ", "");
+
+  try {
+    await admin.auth().verifyIdToken(idToken);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+    const { title, body, priority } = await req.json();
   
-    if (!title || !body || !priority || !notificationType) {
+    if (!title || !body || !priority) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -34,7 +42,7 @@ if (!admin.apps.length) {
   
         if (
           user.notifications?.pushNotifications &&
-          user.notifications[notificationType]
+          user.notifications.newsUpdates
         ) {
           if (user.token) {
             const message: admin.messaging.Message = {

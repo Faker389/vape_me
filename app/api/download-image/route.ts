@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
+import admin from "firebase-admin";
 
 export async function POST(request: Request) {
+  const authHeader = request.headers.get("authorization") || "";
+  const idToken = authHeader.replace("Bearer ", "");
+
+  try {
+    await admin.auth().verifyIdToken(idToken);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { url } = await request.json();
   if (!url) return NextResponse.json({ error: "Missing image URL" }, { status: 400 });
 

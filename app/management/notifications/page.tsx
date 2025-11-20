@@ -77,15 +77,21 @@ export default function NotificationsPage() {
       return
     }
     setIsSending(true)
+    const user = auth.currentUser;
+    const idToken = await user?.getIdToken();
 
     try {
       await axios.post("/api/send_notification/all", {
         title: formData.title,
         body: formData.message,
         priority: formData.priority,
-        notificationType:"pushNotifications" 
-         
-      })
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      }
+    )
       setIsSending(false)
       setShowSuccess(true)
 
