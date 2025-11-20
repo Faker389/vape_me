@@ -82,9 +82,9 @@ export default function AddProductPage() {
   const { products, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus();
   const [focused, setFocused] = useState(false);
-  const [alerts, setAlerts] = useState<Alert[]>([])
   const inputRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
+  const [alerts, setAlerts] = useState<Alert[]>([])
   const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
     const newAlert: Alert = {
       id: crypto.randomUUID(),

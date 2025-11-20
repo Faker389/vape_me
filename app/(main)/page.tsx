@@ -7,10 +7,26 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePres
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
-import { X } from 'lucide-react'
+import { AlertCircle, X } from 'lucide-react'
 import { auth } from "@/lib/firebase"
 export const dynamic = 'force-dynamic'
-
+interface EmailInterface{
+  name:string
+email:string
+subject:string
+message:string
+}
+const initialForm ={
+  name:"",
+  email:"vapeme123321@gmail.com",
+  subject:"",
+  message:""
+}
+interface Alert {
+  id: string
+  message: string
+  type: 'error' | 'success' | 'warning'
+}
 export default function Home() {
   const [mounted, setMounted] = useState(false);
 
@@ -23,15 +39,27 @@ export default function Home() {
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
   const { products, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus();
-  const [showWorkerOptions,setShowWorkerOptions]=useState<boolean>(false)
-
+  const [formData,setFormData]=useState<EmailInterface>(initialForm)
   useEffect(()=>{
     listenToProducts()
   },[listenToProducts])
   useEffect(() => {
     setIsVisible(true)
   }, [])
-
+  const [alerts, setAlerts] = useState<Alert[]>([])
+  const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
+    const newAlert: Alert = {
+      id: crypto.randomUUID(),
+      message,
+      type
+    }
+    
+    setAlerts(prev => [...prev, newAlert])
+    
+    setTimeout(() => {
+      setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
+    }, 3000)
+  }
   const bestsellers = useMemo(() => {
     if (products.length === 0) return []
     
@@ -59,10 +87,55 @@ export default function Home() {
     }
     return newProductsList.slice(0, 20)
   }, [products])
-
+  async function handleSend(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+  
+    const res = await fetch("/api/send_email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+  
+    const data = await res.json();
+  
+    if (!res.ok) {
+      showAlert("Błąd podczas wysyłania wiadomości","error");
+    } else {
+      showAlert("Pomyślnie wysłano wiadomość","success");
+    }
+    setFormData(initialForm)
+  }
+  const getAlertStyles = (type: 'error' | 'success' | 'warning') => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-600 border-green-400'
+      case 'warning':
+        return 'bg-yellow-600 border-yellow-400'
+      case 'error':
+      default:
+        return 'bg-red-600 border-red-400'
+    }
+  }
   if (!mounted) return null;
   return (
     <>
+    <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
+        <AnimatePresence>
+          {alerts.map((alert) => (
+            <motion.div
+              key={alert.id}
+              initial={{ opacity: 0, x: 100, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 100, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className={`${getAlertStyles(alert.type)} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border-2`}
+            >
+              <AlertCircle className="w-6 h-6 flex-shrink-0" />
+              <span className="font-semibold">{alert.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
       {/* Navigation */}
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center">
@@ -245,19 +318,15 @@ export default function Home() {
             <h2 className="text-5xl font-bold gradient-text mb-4 text-center">Skontaktuj Się Z Nami</h2>
             <p className="text-gray-400 text-center mb-12">Masz pytania? Chętnie pomożemy!</p>
 
-            <form className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
+            <form className="space-y-6" onSubmit={handleSend}>
+              <div className="grid  gap-6">
                 <motion.div whileFocus={{ scale: 1.02 }}>
                   <input
+                  value={formData.name}
+                onChange={(e)=>setFormData({...formData,name:e.target.value})}
+
                     type="text"
                     placeholder="Imię i Nazwisko"
-                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-all text-white"
-                  />
-                </motion.div>
-                <motion.div whileFocus={{ scale: 1.02 }}>
-                  <input
-                    type="email"
-                    placeholder="Email"
                     className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-all text-white"
                   />
                 </motion.div>
@@ -265,7 +334,10 @@ export default function Home() {
 
               <motion.div whileFocus={{ scale: 1.02 }}>
                 <input
+                value={formData.subject}
                   type="text"
+                onChange={(e)=>setFormData({...formData,subject:e.target.value})}
+
                   placeholder="Temat"
                   className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-all text-white"
                 />
@@ -273,6 +345,8 @@ export default function Home() {
 
               <motion.div whileFocus={{ scale: 1.02 }}>
                 <textarea
+                value={formData.message}
+                onChange={(e)=>setFormData({...formData,message:e.target.value})}
                   placeholder="Wiadomość"
                   rows={6}
                   className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-all resize-none text-white"
