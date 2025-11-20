@@ -69,10 +69,10 @@ export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "succ
 
   const filteredProducts = useMemo(() => {
     if (!products) return []
-    if (!debouncedSearch.trim()) return products.slice(0, 24)
+    if (!debouncedSearch.trim()) return products.slice(0, 50)
 
     const query = debouncedSearch.toLowerCase().trim()
-    return products.filter((e) => e.id.toString().includes(query) || e.name.toLowerCase().includes(query)).slice(0, 24)
+    return products.filter((e) => e.id.toString().includes(query) || e.name.toLowerCase().includes(query)).slice(0, 50)
   }, [products, debouncedSearch])
 
   const handleProductSelect = useCallback((product: ProductForm) => {
@@ -106,7 +106,13 @@ export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "succ
       isDiscount: false,
       expiryDate: expiryDate.toISOString(),
     } satisfies coupon
+    try {
       await addProduct(couponData)
+    } catch (error) {
+      fkc("Nie udalo sie dodać kuponu","error")      
+    }finally{
+      setIsSubmitting(false)
+    }
   }
 
   return (

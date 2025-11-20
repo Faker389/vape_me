@@ -85,7 +85,6 @@ export default function AddProductPage() {
   const [alerts, setAlerts] = useState<Alert[]>([])
   const inputRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
-
   const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
     const newAlert: Alert = {
       id: crypto.randomUUID(),

@@ -85,14 +85,14 @@ export default function CouponList({fkc}:{fkc:(e: string,e2:"error" | "success" 
         try {
             const couponRef = doc(db, "coupons", editingCoupon.id.toString());
     
-            let expiryDateString: string;
+            
     
                 const date = new Date(editingCoupon.expiryDate);
                 if (isNaN(date.getTime())) {
                     fkc("Nieprawidłowa data wygaśnięcia", "error");
                     return;
                 }
-                expiryDateString = date.toISOString(); // store ISO string
+                const expiryDateString = date.toISOString(); // store ISO string
     
             const updateData: Partial<coupon> = {
                 name: editingCoupon.name,

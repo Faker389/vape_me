@@ -57,7 +57,13 @@ export default function DiscountForm({fkc}:{fkc:(e: string,e2:"error" | "success
           minimalPrice: discountForm.minimalPrice,
           expiryDate: expiryDate.toISOString(),
         } satisfies coupon;
-          await addProduct(couponData);
+        try {
+          await addProduct(couponData)
+        } catch (error) {
+          fkc("Nie udalo sie dodać kuponu","error")      
+        }finally{
+          setIsSubmitting(false)
+        }
       }
     return<motion.div
     key="discount"

@@ -49,7 +49,8 @@ export default function AddCouponsPage() {
       default:
         return 'bg-red-600 border-red-400'
     }
-  }
+  }  
+  
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
