@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
+*{
+  scroll-behavior: smooth;
+}
 @custom-variant dark (&:is(.dark *));
 .gradient-text {
   background: linear-gradient(to right, #9C27B0, #e91e63);

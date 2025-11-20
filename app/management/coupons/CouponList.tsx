@@ -53,20 +53,18 @@ export default function CouponList({fkc}:{fkc:(e: string,e2:"error" | "success" 
     }
     
     const handleEditCoupon = (coupon: coupon) => {
-        // Convert Firestore Timestamp to datetime-local string format
         let expiryDateString = "";
+    
         if (coupon.expiryDate) {
             try {
-                if (typeof coupon.expiryDate.toDate === 'function') {
-                    expiryDateString = coupon.expiryDate.toDate().toISOString().slice(0, 16);
-                } else if (coupon.expiryDate instanceof Date) {
-                    expiryDateString = coupon.expiryDate.toISOString().slice(0, 16);
-                }
-            } catch (error) {
-                fkc("Błąd podczas edytowania kuponu", "error");
+                // convert ISO string → datetime-local format
+                const date = new Date(coupon.expiryDate);
+                expiryDateString = date.toISOString().slice(0, 16);
+            } catch {
+                fkc("Błąd podczas odczytu daty wygaśnięcia", "error");
             }
         }
-      
+    
         setEditingCoupon({
             id: coupon.id,
             name: coupon.name,
@@ -82,53 +80,45 @@ export default function CouponList({fkc}:{fkc:(e: string,e2:"error" | "success" 
     };
     
     const handleSaveEdit = async () => {
-        if(!editingCoupon) return;
-        
+        if (!editingCoupon) return;
+    
         try {
-            const couponRef = doc(db, "coupons", editingCoupon.id.toString())
-            
-            // Convert the datetime-local string to Firestore Timestamp
-            let expiryTimestamp;
-            if (editingCoupon.expiryDate) {
-                try {
-                    const date = new Date(editingCoupon.expiryDate);
-                    if (isNaN(date.getTime())) {
-                        fkc("Nieprawidłowa data wygaśnięcia","error");
-                        return;
-                    }
-                    expiryTimestamp = Timestamp.fromDate(date);
-                } catch (error) {
-                    fkc("Nieprawidłowa data wygaśnięcia","error");
+            const couponRef = doc(db, "coupons", editingCoupon.id.toString());
+    
+            let expiryDateString: string;
+    
+                const date = new Date(editingCoupon.expiryDate);
+                if (isNaN(date.getTime())) {
+                    fkc("Nieprawidłowa data wygaśnięcia", "error");
                     return;
                 }
-            }
-            
+                expiryDateString = date.toISOString(); // store ISO string
+    
             const updateData: Partial<coupon> = {
                 name: editingCoupon.name,
                 category: editingCoupon.category,
                 description: editingCoupon.description,
                 pointsCost: parseInt(editingCoupon.pointsCost) || 0,
-            }
-            
-            if (expiryTimestamp) {
-                updateData.expiryDate = expiryTimestamp;
-            }
-            
+                expiryDate: expiryDateString,
+            };
+    
             if (editingCoupon.isDiscount) {
-                updateData.discountamount = parseInt(editingCoupon.discountamount) || 0
-                updateData.minimalPrice = parseInt(editingCoupon.minimalPrice) || 0
+                updateData.discountamount = parseInt(editingCoupon.discountamount) || 0;
+                updateData.minimalPrice = parseInt(editingCoupon.minimalPrice) || 0;
             } else {
-                updateData.imageUrl = editingCoupon.imageUrl
+                updateData.imageUrl = editingCoupon.imageUrl;
             }
-        
-            await updateDoc(couponRef, updateData)
-            
-            fkc("Pomyślnie zedytowano kupon","success")
-            setEditingCoupon(null)
+    
+            await updateDoc(couponRef, updateData);
+    
+            fkc("Pomyślnie zedytowano kupon", "success");
+            setEditingCoupon(null);
+    
         } catch (error) {
-            fkc("Błąd podczas aktualizacji kuponu","error")
+            fkc("Błąd podczas aktualizacji kuponu","error");
         }
-    }
+    };
+    
     
     return (
         <>
@@ -197,11 +187,11 @@ export default function CouponList({fkc}:{fkc:(e: string,e2:"error" | "success" 
                                     <div className="flex items-center gap-1 text-pink-300">
                                         <Calendar className="w-4 h-4 text-white" />
                                         <span>
-                                            Wygasa:{" "}
-                                            {coupon.expiryDate && typeof coupon.expiryDate.toDate === 'function'
-                                                ? coupon.expiryDate.toDate().toLocaleDateString("pl-PL")
-                                                : "Brak daty"}
-                                        </span>
+                                    Wygasa:{" "}
+                                    {coupon.expiryDate
+                                        ? new Date(coupon.expiryDate).toLocaleDateString("pl-PL")
+                                        : "Brak daty"}
+                                    </span>
                                     </div>
                                     {coupon.isDiscount && coupon.discountamount && (
                                         <div className="px-3 py-1 bg-green-500/20 border border-green-400/30 rounded-full text-green-300 text-xs font-bold">
