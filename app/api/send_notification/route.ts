@@ -1,6 +1,9 @@
 "use server"
 import { NextRequest, NextResponse } from "next/server";
 import admin from "firebase-admin";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { NotificationsSettings, UserModel } from "@/lib/userModel";
 
 // Initialize Firebase Admin once
 if (!admin.apps.length) {
@@ -14,20 +17,25 @@ if (!admin.apps.length) {
   }
 
 export async function POST(req: NextRequest) {
-  const { fcmToken, title, body, priority } = await req.json();
-    console.log({ fcmToken, title, body, priority })
-  if (!fcmToken || !title || !body) {
+  const { userID, title, body, priority,notificationType } = await req.json();
+  if (!userID || !title || !body) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
-
+  const docSnap = await admin.firestore().collection("users").doc(userID).get();
+  if(!docSnap.exists) return NextResponse.json({ error: "User not found" }, { status: 400 });
+  const data = docSnap.data() as UserModel;
+  if (
+    !data.notifications?.pushNotifications 
+  ){
+    return NextResponse.json({ error: "No permissions" }, { status: 400 });
+  }
   const message: admin.messaging.Message = {
-    token: fcmToken,
+    token: data.token!,
     notification: { title, body },
     android: { priority: priority === "high" ? "high" : "normal" },
   };
 
   try {
-
     const response = await admin.messaging().send(message);
     return NextResponse.json({ success: true, response });
   } catch (error) {

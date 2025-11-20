@@ -144,19 +144,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
         fetchProduct(code)
       }
     })
-    const cos = (code :string)=>{
-      if (code.includes("coupon") && code.includes("user")) {
-        const couponID = code.slice(6, code.indexOf("user"))
-        const userID = `+${code.slice(code.indexOf("user") + 4)}`
-        fetchCoupon(couponID, userID)
-        checkIfExists(userID)
-      } else if (code.includes("user")) {
-        const userID = `+${code.slice(4)}`;
-        checkIfExists(userID)
-      } else {
-        fetchProduct(code)
-      }
-    }
+    
     // Remove item handler
     const removeItem = (index: number) => {
       setScannedItems(scannedItems.filter((_, i) => i !== index))
@@ -421,7 +409,6 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
             </Link>
           </div>
         </nav>
-          <input type="text" className="text-white" value={codeVal} onChange={(e) => setCodeVal(e.target.value)} /> <button onClick={()=>cos(codeVal)}>Submit</button>
         {/* Main Content */}
         <div className="relative container mx-auto px-4 py-8 max-w-4xl">
           <motion.h1
