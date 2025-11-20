@@ -76,21 +76,15 @@ export default function NotificationsPage() {
       showAlert("Tytuł i treść wiadomości są wymagane","error")
       return
     }
-
-    if (!navigator.onLine) {
-      showAlert("Brak połączenia z internetem. Sprawdź swoje połączenie i spróbuj ponownie.","error")
-      return
-    }
-
     setIsSending(true)
 
     try {
-      await axios.post("/api/send_notification", {
+      await axios.post("/api/send_notification/all", {
         title: formData.title,
         body: formData.message,
         priority: formData.priority,
-        fcmToken:
-          "dvGvM2N-TsK2fx1sY9qUqg:APA91bGayPSyRjXNWcSK7RN2EIQ3gywP7MnQYf_pxi-CL9BEexQK0LBiNRAchuboMrVLaDc4E6VH8K6clgb2Aj_Fkv55GNVIpwGOU4HjKumAXetDvqNF_zc",
+        notificationType:"pushNotifications" 
+         
       })
       setIsSending(false)
       setShowSuccess(true)
@@ -107,6 +101,7 @@ export default function NotificationsPage() {
         setShowSuccess(false)
       }, 2000)
     } catch (err) {
+      console.log(err)
       showAlert("Nie udało się wysłać powiadomienia. Spróbuj ponownie.","error")
       setIsSending(false)
     }

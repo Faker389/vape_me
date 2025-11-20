@@ -3,20 +3,8 @@ import React, { useState  } from "react"
 import { motion } from "framer-motion"
 import {  Calendar, Coins, Save, DollarSign } from "lucide-react"
 import {  doc, setDoc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
-import DiscountBox from "@/components/discountPhoto"
-interface coupon {
-    id: string
-    name: string
-    description: string
-    imageUrl: string
-    pointsCost: number
-    category: string
-    isDiscount: boolean
-    discountamount?: number
-    expiryDate: Date
-    minimalPrice?: number
-  }
+import { coupon, db } from "@/lib/firebase"
+
   interface formCoupon {
     title: string
     category: string
@@ -67,7 +55,7 @@ export default function DiscountForm({fkc}:{fkc:(e: string,e2:"error" | "success
           isDiscount: true,
           discountamount: discountForm.discountPercent,
           minimalPrice: discountForm.minimalPrice,
-          expiryDate,
+          expiryDate: expiryDate.toISOString(),
         } satisfies coupon;
           await addProduct(couponData);
       }
@@ -175,12 +163,7 @@ export default function DiscountForm({fkc}:{fkc:(e: string,e2:"error" | "success
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Image URL */}
-        <div>
-          <label className="block text-white font-medium mb-2">
-            Zdjęcie
-          </label>
-            <DiscountBox percentage={discountForm.discountPercent} />
-        </div>
+        
       </div>
 
       {/* Submit Button */}

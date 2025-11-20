@@ -18,7 +18,22 @@ export interface TransactionModel {
     promotions: boolean;
     pushNotifications: boolean;
   }
-  
+  export interface UserCoupon{
+    category: string;
+    claimedDate: string;       // ISO date string
+    description: string;
+    expiryDate: string;        // ISO date string
+    id: string;
+    imageUrl: string;
+    isDiscount: boolean;
+    isUsed: boolean;
+    minimalPrice: number;
+    pointsCost: number;
+    rewardID: string;
+    discountamount?: number
+    title: string;
+    usedDate: string | null;   // 
+  }
   export interface UserModel {
     uid: string;
     name: string;
@@ -30,5 +45,5 @@ export interface TransactionModel {
     transactions?: TransactionModel[];
     token?: string;
     notifications?: NotificationsSettings;
-    coupons?: CouponModel[];
+    coupons?: UserCoupon[];
   }

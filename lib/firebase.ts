@@ -28,7 +28,7 @@ export interface coupon {
   category: string
   isDiscount: boolean
   discountamount?: number
-  expiryDate: Timestamp
+  expiryDate: string
   minimalPrice?: number
 }
 

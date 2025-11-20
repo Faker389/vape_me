@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Calendar, Coins, Save, Check, X } from "lucide-react"
 import type { ProductForm } from "@/lib/productModel"
-import { doc, setDoc, Timestamp } from "firebase/firestore"
+import { doc, setDoc } from "firebase/firestore"
 import { type coupon, db } from "@/lib/firebase"
 import { useProductsStore } from "@/lib/storage"
 
@@ -104,7 +104,7 @@ export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "succ
       pointsCost: itemForm.pointCost,
       category: selectedProduct.category,
       isDiscount: false,
-      expiryDate: Timestamp.fromDate(expiryDate),
+      expiryDate: expiryDate.toISOString(),
     } satisfies coupon
       await addProduct(couponData)
   }

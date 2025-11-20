@@ -1,6 +1,6 @@
 "use client"
 
-import { useState,useEffect } from "react"
+import { useState,useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
@@ -39,12 +39,14 @@ export default function ItemsManagementPage() {
   const [location, setLocation] = useState<"location1" | "location2">("location1")
   const { products, listenToProducts } = useProductsStore()
   const [searchQuery, setSearchQuery] = useState<string>("")
-    const [alerts, setAlerts] = useState<Alert[]>([])
-    const [features, setFeatures] = useState<string[]>([])
+  const [alerts, setAlerts] = useState<Alert[]>([])
+  const [features, setFeatures] = useState<string[]>([])
   const [specifications, setSpecifications] = useState<Record<string, string>>({})
   const [newFeature, setNewFeature] = useState("")
   const [newSpecKey, setNewSpecKey] = useState("")
+  const [removeBG,setRemoveBG]=useState<boolean>(false)
   const [newSpecValue, setNewSpecValue] = useState("")
+  const imageRef = useRef<HTMLInputElement>(null)
   const isOnline = useOnlineStatus();
   const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
     const newAlert: Alert = {
@@ -137,43 +139,70 @@ export default function ItemsManagementPage() {
       showAlert("Error updating product:", "error");
     }
   }
-
-  const handleSave = async () => {
-    if (!formData) return
-  
-    try {
-      let imageUrl = formData.image;
-      const storageRef = ref(storage, `products/${formData.id}.webp`);
-      // === CASE 1: User selected a local file ===
-      if (formData.imageFile) {
-        const file = formData.imageFile as File;
-  
-        // Upload file directly to Firebase Storage
-        await uploadBytes(storageRef, file);
-        imageUrl = await getDownloadURL(storageRef);
-        showAlert("Zaimportowano zdjecie", "success");
-      }
-  
-      // === CASE 2: User provided an image URL ===
-      else if (formData.image && formData.image.trim() !== ""&&!formData.image.includes("firebase")) {
-  
-        // Fetch the image as blob
+  const handleImageUpload = async()=>{
+    if(!formData) return "";
+    let imageUrl = formData.image;
+    const storageRef = ref(storage, `products/${formData.id}.webp`);
+    // 1️⃣ Get image blob (from file upload or external URL)
+    let fileBlob: Blob | null = null;
+    if (formData.imageFile) {
+      fileBlob = formData.imageFile;
+    } else if (formData.image && formData.image.trim() !== "") {
+      try {
         const res = await fetch("/api/download-image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url: formData.image }),
         });
-        const blob = await res.blob();
-        // Upload fetched blob to Firebase Storage
-        await uploadBytes(storageRef, blob);
-        imageUrl = await getDownloadURL(storageRef);
-        showAlert("Zaimportowano zdjecie", "success");
+        if (!res.ok) throw new Error("Image download failed");
+        fileBlob = await res.blob();
+      } catch (e) {
+        showAlert("Błąd pobierania zdjęcia", "error");
       }
+    }
+
+    // 2️⃣ Try to remove background (if requested)
+    if (removeBG && fileBlob) {
+      try {
+        const formDataBg = new FormData();
+        formDataBg.append("file", fileBlob, "input.png");
+
+        const bgRes = await fetch("/api/remove_bg", {
+          method: "POST",
+          body: formDataBg,
+        });
+
+        if (!bgRes.ok) throw new Error("Background removal failed");
+
+        const bgBlob = await bgRes.blob();
+        if (bgBlob && bgBlob.size > 0) {
+          fileBlob = bgBlob; // replace with processed image
+        } else {
+          showAlert("Nie udalo sie usunąć tła",'warning');
+        }
+      } catch (err) {
+        showAlert("Nie udalo sie usunąć tła",'warning');
+      }
+    }
+
+    // 3️⃣ Upload image (original or processed) to Firebase Storage
+    if (fileBlob) {
+      await uploadBytes(storageRef, fileBlob);
+      imageUrl = await getDownloadURL(storageRef);
+    } else {
+      imageUrl = "";
+    }
+    return imageUrl
+  }
+  const handleSave = async () => {
+    if (!formData) return
   
-      // === CASE 3: No image at all ===
-      else {
-        showAlert("⚠️ No image provided. Skipping image upload.","warning");
-        imageUrl = "";
+    try {
+      let imageUrl="";
+      if(formData.image.includes("https://firebasestorage.googleapis.com")&&formData.imageFile==undefined){
+        imageUrl=formData.image
+      }else{
+        imageUrl = await handleImageUpload();
       }
   
       // Prepare product data
@@ -388,7 +417,7 @@ export default function ItemsManagementPage() {
               <input
                 type="file"
                 accept="image/*"
-                
+                ref={imageRef}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -397,6 +426,16 @@ export default function ItemsManagementPage() {
                 }}
                 className="text-sm text-gray-300 underline cursor-pointer"
                 />
+                <>
+                <input
+                type="checkbox"
+                checked={removeBG}
+                onChange={() => setRemoveBG(!removeBG)}
+                className="w-5 h-5 accent-purple-500 rounded border-white/10 bg-gray-800/50 text-purple-600 focus:ring-purple-500/50 transition-colors"
+  />
+              <span className="text-white  transition-colors">
+                Usuń tło zdjęcia
+              </span></>
                 </div>
           </div>
 
@@ -534,7 +573,6 @@ export default function ItemsManagementPage() {
                 <div className="pt-4 border-t border-white/10">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-medium text-gray-400">Cechy produktu</label>
-                    <Plus className="w-4 h-4 text-purple-400" />
                   </div>
 
                   <div className="flex gap-2 mb-3">
@@ -579,7 +617,6 @@ export default function ItemsManagementPage() {
                 <div className="pt-4 border-t border-white/10">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-medium text-gray-400">Specyfikacja</label>
-                    <Plus className="w-4 h-4 text-pink-400" />
                   </div>
 
                   <div className="flex gap-2 mb-3">
@@ -606,9 +643,9 @@ export default function ItemsManagementPage() {
                     </button>
                   </div>
 
-                  {Object.keys(specifications).length > 0 && (
+                  {Object.entries(specifications).length !== 0 && (
                     <div className="space-y-2">
-                      {Object.entries(specifications).map(([key, value]) => (
+                      {Object.entries(specifications).length !== 0&&Object.entries(specifications).map(([key, value]) => (
                         <motion.div
                           key={key}
                           initial={{ opacity: 0, x: -10 }}
@@ -616,7 +653,7 @@ export default function ItemsManagementPage() {
                           className="group flex items-center justify-between px-4 py-2 bg-pink-600/10 border border-pink-500/20 rounded-lg"
                         >
                           <div className="flex items-center gap-3">
-                            <span className="text-gray-400 text-sm font-medium">{key}:</span>
+                            <span className="text-gray-400 text-sm font-medium">{key}</span>
                             <span className="text-white text-sm">{value}</span>
                           </div>
                           <button

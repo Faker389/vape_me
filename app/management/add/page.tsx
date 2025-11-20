@@ -57,6 +57,7 @@ const initialForm: ProductForm = {
   store1quantity: 0,
   store2quantity: 0,
   description: "",
+  imageFile: undefined,
   image: "",
   features: [],
   specifications: {},
@@ -83,6 +84,7 @@ export default function AddProductPage() {
   const [focused, setFocused] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([])
   const inputRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
 
   const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
     const newAlert: Alert = {
@@ -121,7 +123,7 @@ export default function AddProductPage() {
   }, [listenToProducts])
   useBarcodeScanner((code) => {
     isNew.current = true
-    handleInputChange("id", code)
+    handleInputChange("id", parseInt(code))
   })
   const addFeature = () => {
     if (newFeature.trim()) {
@@ -155,8 +157,9 @@ export default function AddProductPage() {
     setFormData({ ...formData, specifications: updatedSpecs })
   }
   const handleInputChange = (field: keyof productTemp, value: ProductFieldValue) => {
-    if (field === "id" && typeof value === "string") {
-      checkIfExists(parseInt(value))
+    console.log(field , typeof value)
+    if (field === "id" && typeof value === "number") {
+      checkIfExists(value)
       return
     }
   
@@ -222,6 +225,7 @@ export default function AddProductPage() {
     try {
       const productRef = doc(db, "products", product.id.toString())
       await setDoc(productRef, product)
+      imageRef.current?imageRef.current.value="":"";
       showAlert("Pomyślnie dodano produkt", "success")
     } catch (error) {
       showAlert("Błąd podczas dodawania produktu", "error")
@@ -233,69 +237,76 @@ export default function AddProductPage() {
       const productRef = doc(db, "products", productId.toString())
   
       await updateDoc(productRef, updatedData)
-  
+      imageRef.current?imageRef.current.value="":"";
       showAlert("Pomyślnie zmodyfikowano produkt","success")
     } catch (error) {
       showAlert("Błąd podczas modyfikacji produktu", "error")
     }
   }
+  const handleImageUpload = async()=>{
+    let imageUrl = formData.image;
+    const storageRef = ref(storage, `products/${formData.id}.webp`);
+    // 1️⃣ Get image blob (from file upload or external URL)
+    let fileBlob: Blob | null = null;
+    if (formData.imageFile) {
+      fileBlob = formData.imageFile;
+    } else if (formData.image && formData.image.trim() !== "") {
+      try {
+        const res = await fetch("/api/download-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: formData.image }),
+        });
+        if (!res.ok) throw new Error("Image download failed");
+        fileBlob = await res.blob();
+      } catch (e) {
+        showAlert("Błąd pobierania zdjęcia", "error");
+      }
+    }
+
+    // 2️⃣ Try to remove background (if requested)
+    if (removeBG && fileBlob) {
+      try {
+        const formDataBg = new FormData();
+        formDataBg.append("file", fileBlob, "input.png");
+
+        const bgRes = await fetch("/api/remove_bg", {
+          method: "POST",
+          body: formDataBg,
+        });
+
+        if (!bgRes.ok) throw new Error("Background removal failed");
+
+        const bgBlob = await bgRes.blob();
+        if (bgBlob && bgBlob.size > 0) {
+          fileBlob = bgBlob; // replace with processed image
+        } else {
+          showAlert("Nie udalo sie usunąć tła",'warning');
+        }
+      } catch (err) {
+        showAlert("Nie udalo sie usunąć tła",'warning');
+      }
+    }
+
+    // 3️⃣ Upload image (original or processed) to Firebase Storage
+    if (fileBlob) {
+      await uploadBytes(storageRef, fileBlob);
+      imageUrl = await getDownloadURL(storageRef);
+    } else {
+      imageUrl = "";
+    }
+    return imageUrl
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
     try {
-      let imageUrl = formData.image;
-      const storageRef = ref(storage, `products/${formData.id}.webp`);
-  
-      // 1️⃣ Get image blob (from file upload or external URL)
-      let fileBlob: Blob | null = null;
-      if (formData.imageFile) {
-        fileBlob = formData.imageFile;
-      } else if (formData.image && formData.image.trim() !== "") {
-        try {
-          const res = await fetch("/api/download-image", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: formData.image }),
-          });
-          if (!res.ok) throw new Error("Image download failed");
-          fileBlob = await res.blob();
-        } catch (e) {
-          showAlert("Błąd pobierania zdjęcia", "error");
-        }
+      let imageUrl="";
+      if(formData.image.includes("https://firebasestorage.googleapis.com")&&formData.imageFile==undefined){
+        imageUrl=formData.image
+      }else{
+        imageUrl = await handleImageUpload();
       }
-  
-      // 2️⃣ Try to remove background (if requested)
-      if (removeBG && fileBlob) {
-        try {
-          const formDataBg = new FormData();
-          formDataBg.append("file", fileBlob, "input.png");
-  
-          const bgRes = await fetch("/api/remove_bg", {
-            method: "POST",
-            body: formDataBg,
-          });
-  
-          if (!bgRes.ok) throw new Error("Background removal failed");
-  
-          const bgBlob = await bgRes.blob();
-          if (bgBlob && bgBlob.size > 0) {
-            fileBlob = bgBlob; // replace with processed image
-          } else {
-            showAlert("Nie udalo sie usunąć tła",'warning');
-          }
-        } catch (err) {
-          showAlert("Nie udalo sie usunąć tła",'warning');
-        }
-      }
-  
-      // 3️⃣ Upload image (original or processed) to Firebase Storage
-      if (fileBlob) {
-        await uploadBytes(storageRef, fileBlob);
-        imageUrl = await getDownloadURL(storageRef);
-      } else {
-        imageUrl = "";
-      }
-  
       // 4️⃣ Save product info
       const productData = { ...formData, image: imageUrl };
       delete productData.imageFile;
@@ -317,6 +328,7 @@ export default function AddProductPage() {
     }
   };
   useEffect(() => {
+    console.log(formData.imageFile)
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
         window.location.href = "/"
@@ -437,7 +449,7 @@ export default function AddProductPage() {
               <input
                 type="file"
                 accept="image/*"
-                
+                ref={imageRef}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {

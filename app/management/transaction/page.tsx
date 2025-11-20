@@ -7,11 +7,12 @@
   import { ArrowLeft, CheckCircle, XCircle, ShoppingCart, Tag, CreditCard, X, AlertCircle, Plus } from "lucide-react"
   import { auth, currentDate, db, transactions } from "@/lib/firebase"
   import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
-  import { arrayUnion, collection, doc, getDoc, getDocs, where, increment, query, updateDoc, writeBatch } from "firebase/firestore"
+  import { arrayUnion, collection, doc, getDoc, getDocs, where, increment, query, updateDoc, writeBatch, onSnapshot } from "firebase/firestore"
   import axios from "axios"
   import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
+import {  UserCoupon, UserModel } from "@/lib/userModel"
 
   interface ScannedItem {
     id: number
@@ -39,7 +40,7 @@ import { ProductForm } from "@/lib/productModel"
   }
   export default function TransactionPage() {
     const [mounted, setMounted] = useState(false);
-
+    const [codeVal,setCodeVal]=useState<string>("")
     useEffect(() => {
       setMounted(true);
     }, []);
@@ -91,34 +92,37 @@ import { ProductForm } from "@/lib/productModel"
       try {
         if (couponId && userId ) {
           // Access the coupon from the user's coupons subcollection
-          const docRef = doc(db, "users", userId, "coupons", couponId);
+          const docRef = doc(db, "users", userId);
           const docSnap = await getDoc(docRef);
-    
           if (docSnap.exists()) {
-            const data = docSnap.data();
+            const data = docSnap.data() as UserModel;
+            const coupon = data.coupons!.find(e => e.id === couponId) as UserCoupon;
+            if(coupon.isUsed){
+              showAlert("Ten kupon został już wykorzystany", "warning")
+              return true;
+            }
             setscannedCoupons([...scannedCoupons,{
               id: couponId,
-              code: data.code ?? "",
-              title: data.title ?? "",
-              imageUrl: data.imageUrl ?? "",
-              minimalPrice: data.minimalPrice,
-              isDiscount: data.isDiscount ?? false,
-              discountamount: data.discountamount ?? 0,
+              code: coupon.rewardID ?? "",
+              title: coupon.title ?? "",
+              imageUrl: coupon.imageUrl ?? "",
+              minimalPrice: coupon.minimalPrice,
+              isDiscount: coupon.isDiscount ?? false,
+              discountamount: coupon.discountamount ?? 0,
             }])
           } else {
             showAlert("Podany użytkownik nie posiada danego kuponu","warning")
           }
         }
       } catch(err) {
+        console.log(err)
         showAlert("Błąd pobierania kuponu", "error")
       }
     }
-
     async function checkIfExists(userID: string) {
         if (userID) {
           const docRef = doc(db, "users", userID);
           const docSnap = await getDoc(docRef);
-    
           if (docSnap.exists()) {
             setUserScanned(userID)
           } else {
@@ -140,7 +144,19 @@ import { ProductForm } from "@/lib/productModel"
         fetchProduct(code)
       }
     })
-
+    const cos = (code :string)=>{
+      if (code.includes("coupon") && code.includes("user")) {
+        const couponID = code.slice(6, code.indexOf("user"))
+        const userID = `+${code.slice(code.indexOf("user") + 4)}`
+        fetchCoupon(couponID, userID)
+        checkIfExists(userID)
+      } else if (code.includes("user")) {
+        const userID = `+${code.slice(4)}`;
+        checkIfExists(userID)
+      } else {
+        fetchProduct(code)
+      }
+    }
     // Remove item handler
     const removeItem = (index: number) => {
       setScannedItems(scannedItems.filter((_, i) => i !== index))
@@ -201,44 +217,68 @@ import { ProductForm } from "@/lib/productModel"
         }
     }
     const updateProductsQuantity = async () => {
-          const docRefProducts = doc(db, "products");
-          const docSnapProducts = await getDoc(docRefProducts);
-          if (!docSnapProducts.exists()) {
-            showAlert("Nie można pobrać produktów", "error")  
-            return false;
-          }
+          await onSnapshot(collection(db, "products"), (snapshot) => {
+            const data = snapshot.docs.map((doc) => doc.data() as ProductForm)
+            if (data==null||data.length==0) {
+              showAlert("Nie można pobrać produktów", "error")  
+              return false;
+            }
+          })
           try {
-            scannedItems.forEach((e)=>{
+            scannedItems.forEach(async(e)=>{
               const productRef = doc(db, "products", e.id.toString());
               const val = currentLocation.current=="location1"?{store1quantity:increment(-1)}:{store2quantity:increment(-1)};
-              updateDoc(productRef,val);
+              await updateDoc(productRef,val);
             })
             return true;
           } catch (error) {
+            console.log("blat")
             showAlert("Wystąpił błąd podczas aktualizacji produktów", "error")
             return false;
           }
     }
-    const updateCoupons = async()=>{
-      if (userScanned == null){ 
-        showAlert("Użytkownik niezeskanowany", "error")  
+    const updateCoupons = async () => {
+      if(scannedCoupons.length==0) return true;
+      if (!userScanned) {
+        showAlert("Użytkownik niezeskanowany", "error");
         return false;
       }
+    
       try {
-        for(let x=0;x<scannedCoupons.length;x++){
-          const coupon = scannedCoupons[x];
-          const couponRef = doc(db, "users", userScanned, "coupons", coupon.id);
-          await updateDoc(couponRef, {
-            isUsed: true,
-            usedDate: currentDate
-          });
+        const userRef = doc(db, "users", userScanned);
+        const userSnap = await getDoc(userRef);
+    
+        if (!userSnap.exists()) {
+          showAlert("Nie znaleziono użytkownika", "error");
+          return false;
         }
+    
+        const userData = userSnap.data();
+        const coupons = userData.coupons || [];
+    
+        // Update selected coupons
+        const usedDate = new Date()
+        const updatedCoupons = coupons.map((coupon: UserCoupon)=> {
+          if (scannedCoupons.some(sc => sc.id === coupon.id)) {
+            return {
+              ...coupon,
+              isUsed: true,
+              usedDate: usedDate.toISOString()
+            };
+          }
+          return coupon;
+        });
+    
+        await updateDoc(userRef, { coupons: updatedCoupons });
+    
         return true;
-      } catch (error) {
-        showAlert("Wystąpił błąd podczas aktualizacji kuponu", "error")
-        return false
+      } catch (err) {
+        console.log(err);
+        showAlert("Wystąpił błąd podczas aktualizacji kuponu", "error");
+        return false;
       }
-    }
+    };
+    
     const sentNotification = async()=>{
       if (userScanned == null){ 
         showAlert("Użytkownik niezeskanowany", "error")  
@@ -262,20 +302,28 @@ import { ProductForm } from "@/lib/productModel"
           });
           return true;
       } catch (error) {
+        console.log(error)
           showAlert("Wystąpił błąd podczas wysyłania powiadomienia", "error")
           return false;
       }
     }
     const handleFinishTransaction = async() => {
-        const resp1 = await addParamsToUser()
+      const resp1 = await updateProductsQuantity()
+      console.log(resp1)
+        if(resp1&&userScanned==null){
+          showAlert("Transakcja zakończona pomyślnie!", "success")
+          setTimeout(() => {
+            setScannedItems([])
+            setUserScanned(null)
+            setscannedCoupons([])
+          }, 1000)
+          return
+        }
         if (!resp1) return
-    
-        const resp2 = await updateProductsQuantity()
+        const resp2 = await addParamsToUser()
         if (!resp2) return
-    
         const resp3 = await updateCoupons()
         if (!resp3) return
-    
         await sentNotification()
     
         if (resp1 && resp2 && resp3) {
@@ -373,7 +421,7 @@ import { ProductForm } from "@/lib/productModel"
             </Link>
           </div>
         </nav>
-
+          <input type="text" className="text-white" value={codeVal} onChange={(e) => setCodeVal(e.target.value)} /> <button onClick={()=>cos(codeVal)}>Submit</button>
         {/* Main Content */}
         <div className="relative container mx-auto px-4 py-8 max-w-4xl">
           <motion.h1
@@ -614,7 +662,6 @@ import { ProductForm } from "@/lib/productModel"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={isOnline?handleFinishTransaction:()=>{}}
-            disabled={!userScanned}
             className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
           Zakończ transakcję
