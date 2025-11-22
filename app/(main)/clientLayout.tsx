@@ -26,7 +26,7 @@ export default function ClientLayout({
     return () => unsubscribe()
   }, [])
   return (
-    <main className="min-h-full globalWhite bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] overflow-hidden">
+    <main className="min-h-screen w-screen globalWhite bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] overflow-x-hidden">
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -108,7 +108,7 @@ export default function ClientLayout({
       </motion.nav>
       <AgeVerificationModal />
       {/* Add pt-20 for mobile, pt-24 for tablet and up to account for fixed navbar height */}
-      <div className="pt-20 sm:pt-24">{children}</div>
+      <div className="pt-20 sm:pt-24 w-full">{children}</div>
     </main>
   )
 }
