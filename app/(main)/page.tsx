@@ -556,9 +556,9 @@ const InfiniteScrollSection = ({
             <Link key={`${product.id}-${i}`} href={`/products/${product.id}`}>
               <motion.div
                 whileHover={{ scale: 1.05, y: -10 }}
-                className="flex-shrink-0 w-72 glass-effect rounded-2xl overflow-hidden group cursor-pointer shadow-lg border border-white/10"
+                className="flex-shrink-0 w-48 sm:w-60 md:w-72 glass-effect rounded-2xl overflow-hidden group cursor-pointer shadow-lg border border-white/10"
               >
-                <div className="h-64 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden p-4">
+                <div className="h-48 sm:h-56 md:h-64 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden p-4">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Image
                       src={product.image || "/placeholder.svg"}
@@ -573,17 +573,17 @@ const InfiniteScrollSection = ({
                   {product.isBestseller && <ProductBadge variant="bestseller" />}
                   {product.isNew && <ProductBadge variant="new" />}
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex flex-col h-full">
                   <h3 className="font-bold text-xl mb-2 group-hover:gradient-text transition-all line-clamp-1">
                     {product.name}
                   </h3>
                   <p className="text-gray-400 text-sm mb-4 line-clamp-2">{product.description}</p>
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col gap-3 mt-auto">
                     <span className="text-2xl font-bold gradient-text">{product.price.toFixed(2)} zł</span>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-sm font-semibold"
+                      className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-sm font-semibold"
                     >
                       Sprawdź
                     </motion.button>

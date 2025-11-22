@@ -26,8 +26,8 @@ export default function ClientLayout({
     return () => unsubscribe()
   }, [])
   return (
-    <main className="min-h-screen w-screen globalWhite bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] overflow-x-hidden">
-      <motion.nav
+<main className=" min-h-[100dvh] w-screen globalWhite bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f] overflow-x-hidden">
+<motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className="fixed top-0 left-0 right-0 z-50 glass-effect backdrop-blur-xl bg-[#0a0a0f]/80"
