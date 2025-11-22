@@ -1,70 +1,70 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion"
 import { useProductsStore } from "@/lib/storage"
-import { ProductForm } from "@/lib/productModel"
+import type { ProductForm } from "@/lib/productModel"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
-import { AlertCircle, X } from 'lucide-react'
+import { AlertCircle, X, Sparkles, TrendingUp } from "lucide-react"
 import ContactForm from "./ContactForm"
-export const dynamic = 'force-dynamic'
-interface EmailInterface{
-  title:string
-  message:string
+export const dynamic = "force-dynamic"
+interface EmailInterface {
+  title: string
+  message: string
 }
-const initialForm ={
-  title:"",
-  message:"",
+const initialForm = {
+  title: "",
+  message: "",
 }
 interface Alert {
   id: string
   message: string
-  type: 'error' | 'success' | 'warning'
+  type: "error" | "success" | "warning"
 }
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
   const [isVisible, setIsVisible] = useState(false)
   const { scrollYProgress } = useScroll()
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
   const { products, listenToProducts } = useProductsStore()
-  const isOnline = useOnlineStatus();
-  const [formData,setFormData]=useState<EmailInterface>(initialForm)
-  useEffect(()=>{
+  const isOnline = useOnlineStatus()
+  const [formData, setFormData] = useState<EmailInterface>(initialForm)
+  useEffect(() => {
     listenToProducts()
-  },[listenToProducts])
+  }, [listenToProducts])
   useEffect(() => {
     setIsVisible(true)
   }, [])
   const [alerts, setAlerts] = useState<Alert[]>([])
-  const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
+  const showAlert = (message: string, type: "error" | "success" | "warning" = "error") => {
     const newAlert: Alert = {
       id: crypto.randomUUID(),
       message,
-      type
+      type,
     }
-    
-    setAlerts(prev => [...prev, newAlert])
-    
+
+    setAlerts((prev) => [...prev, newAlert])
+
     setTimeout(() => {
-      setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
+      setAlerts((prev) => prev.filter((alert) => alert.id !== newAlert.id))
     }, 3000)
   }
   const bestsellers = useMemo(() => {
     if (products.length === 0) return []
-    
-    const bestsellerProducts = products.filter(p => p.isBestseller)
-    
+
+    const bestsellerProducts = products.filter((p) => p.isBestseller)
+
     if (bestsellerProducts.length < 20) {
-      const otherProducts = products
-        .filter(p => !p.isBestseller)
-        .slice(0, 20 - bestsellerProducts.length)
+      const otherProducts = products.filter((p) => !p.isBestseller).slice(0, 20 - bestsellerProducts.length)
       return [...bestsellerProducts, ...otherProducts]
     }
     return bestsellerProducts.slice(0, 20)
@@ -72,50 +72,48 @@ export default function Home() {
 
   const newProducts = useMemo(() => {
     if (products.length === 0) return []
-    
-    const newProductsList = products.filter(p => p.isNew)
-    
+
+    const newProductsList = products.filter((p) => p.isNew)
+
     if (newProductsList.length < 20) {
-      const otherProducts = products
-        .filter(p => !p.isNew)
-        .slice(0, 20 - newProductsList.length)
+      const otherProducts = products.filter((p) => !p.isNew).slice(0, 20 - newProductsList.length)
       return [...newProductsList, ...otherProducts]
     }
     return newProductsList.slice(0, 20)
   }, [products])
   async function handleSend(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-  
+    e.preventDefault()
+
     const res = await fetch("/api/send_email", {
       method: "POST",
-      headers: { "Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
-    });
-  
-    const data = await res.json();
-  
+    })
+
+    const data = await res.json()
+
     if (!res.ok) {
-      showAlert("Błąd podczas wysyłania wiadomości","error");
+      showAlert("Błąd podczas wysyłania wiadomości", "error")
     } else {
-      showAlert("Pomyślnie wysłano wiadomość","success");
+      showAlert("Pomyślnie wysłano wiadomość", "success")
     }
     setFormData(initialForm)
   }
-  const getAlertStyles = (type: 'error' | 'success' | 'warning') => {
+  const getAlertStyles = (type: "error" | "success" | "warning") => {
     switch (type) {
-      case 'success':
-        return 'bg-green-600 border-green-400'
-      case 'warning':
-        return 'bg-yellow-600 border-yellow-400'
-      case 'error':
+      case "success":
+        return "bg-green-600 border-green-400"
+      case "warning":
+        return "bg-yellow-600 border-yellow-400"
+      case "error":
       default:
-        return 'bg-red-600 border-red-400'
+        return "bg-red-600 border-red-400"
     }
   }
-  if (!mounted) return null;
+  if (!mounted) return null
   return (
     <>
-    <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
+      <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
         <AnimatePresence>
           {alerts.map((alert) => (
             <motion.div
@@ -172,7 +170,10 @@ export default function Home() {
               >
                 Zdobywaj
                 <span className="gradient-text">Nagrody</span>
-                <span> Robiąc <span className="gradient-text">Zakupy</span></span>
+                <span>
+                  {" "}
+                  Robiąc <span className="gradient-text">Zakupy</span>
+                </span>
               </motion.h1>
             </motion.div>
 
@@ -198,7 +199,7 @@ export default function Home() {
                   whileTap={{ scale: 0.95 }}
                   className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-white font-bold text-lg glow-effect flex items-center gap-3"
                 >
-                <Image src="/android-logo.svg" alt="Android Logo" width={20} height={20} />
+                  <Image src="/android-logo.svg" alt="Android Logo" width={20} height={20} />
                   Pobierz na Android
                 </motion.button>
               </a>
@@ -402,20 +403,20 @@ export default function Home() {
             </div>
           </div>
           <AnimatePresence>
-        {!isOnline && (
-    <motion.div
-      key="offline-alert"
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-      transition={{ type: "spring", stiffness: 120 }}
-      className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
-    >
-      <X className="w-6 h-6" />
-      <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
-    </motion.div>
-  )}
-</AnimatePresence>
+            {!isOnline && (
+              <motion.div
+                key="offline-alert"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                transition={{ type: "spring", stiffness: 120 }}
+                className="fixed bottom-8 left-8 bg-red-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-xl border border-white/20"
+              >
+                <X className="w-6 h-6" />
+                <span className="font-semibold">Brak połączenia z internetem. Połącz się, aby kontynuować.</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div className="border-t border-white/10 pt-8 text-center text-gray-400 text-sm">
             © 2025 Vape me. Wszelkie prawa zastrzeżone.
           </div>
@@ -425,7 +426,35 @@ export default function Home() {
   )
 }
 
-const InfiniteScrollSection = ({ title, subtitle, direction, products }: {
+// Optimized badge component with no animations
+const ProductBadge = ({ variant }: { variant: "bestseller" | "new" }) => {
+  if (variant === "bestseller") {
+    return (
+      <div className="absolute top-3 right-3 z-10">
+        <div className="px-3 py-1.5 bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 rounded-lg text-xs font-black uppercase tracking-wide shadow-xl border-2 border-yellow-300/50 flex items-center gap-1.5">
+          <TrendingUp className="w-3.5 h-3.5" />
+          <span className="text-yellow-950">Bestseller</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="absolute top-3 left-3 z-10">
+      <div className="px-3 py-1.5 bg-gradient-to-br from-pink-400 via-fuchsia-500 to-pink-600 rounded-lg text-xs font-black uppercase tracking-wide shadow-xl border-2 border-pink-300/50 flex items-center gap-1.5">
+        <Sparkles className="w-3.5 h-3.5" />
+        <span className="text-white">Nowość</span>
+      </div>
+    </div>
+  )
+}
+
+const InfiniteScrollSection = ({
+  title,
+  subtitle,
+  direction,
+  products,
+}: {
   title: string
   subtitle: string
   direction: "left" | "right"
@@ -541,22 +570,23 @@ const InfiniteScrollSection = ({ title, subtitle, direction, products }: {
                       quality={75}
                     />
                   </div>
-                  {product.isBestseller && (
-                    <div className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-bold shadow-lg">
-                      BESTSELLER
-                    </div>
-                  )}
-                  {product.isNew && (
-                    <div className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full text-xs font-bold shadow-lg">
-                      NOWOŚĆ
-                    </div>
-                  )}
+                  {product.isBestseller && <ProductBadge variant="bestseller" />}
+                  {product.isNew && <ProductBadge variant="new" />}
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2 truncate">{product.name}</h3>
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">{product.category}</p>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-2xl font-bold gradient-text">{product.price} zł</span>
+                  <h3 className="font-bold text-xl mb-2 group-hover:gradient-text transition-all line-clamp-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">{product.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-2xl font-bold gradient-text">{product.price.toFixed(2)} zł</span>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-sm font-semibold"
+                    >
+                      Sprawdź
+                    </motion.button>
                   </div>
                 </div>
               </motion.div>

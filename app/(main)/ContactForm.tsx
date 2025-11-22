@@ -39,7 +39,7 @@ export default function ContactForm({ showAlert }: { showAlert: (e: string,e2:"e
         ref={messageRef}
         placeholder="Wiadomość"
         rows={6}
-        className="w-full px-6 py-4 bg-white/5 border focus:border-purple-500 rounded-xl text-white"
+        className="w-full resize-none px-6 py-4 bg-white/5 border focus:border-purple-500 rounded-xl text-white"
       />
 
       <button

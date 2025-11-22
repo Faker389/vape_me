@@ -47,7 +47,14 @@ let auth: Auth
 let provider: GoogleAuthProvider
 let db: Firestore
 let storage: FirebaseStorage
-
+export function getCurrentUser() {
+  return new Promise((resolve) => {
+    const unsub = auth.onAuthStateChanged((user) => {
+      unsub();
+      resolve(user?.getIdToken());
+    });
+  });
+}
 if (typeof window !== "undefined") {
   app = getApps().length ? getApp() : initializeApp(firebaseConfig)
   auth = getAuth(app)

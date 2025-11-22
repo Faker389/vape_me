@@ -13,10 +13,68 @@ import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 const cbdOptions = ["Wszystkie", "Z CBD", "Bez CBD"]
 export const dynamic = "force-dynamic"
 
-const ProductCard = ({ product, showWorkerOptions, getLocationText }: { 
+// Image loading optimization component
+const OptimizedProductImage = ({ src, alt, priority = false }: { src: string; alt: string; priority?: boolean }) => {
+  const [imageSrc, setImageSrc] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!src) {
+      setImageSrc("/placeholder.svg")
+      setIsLoading(false)
+      return
+    }
+
+    // Use requestIdleCallback for non-priority images
+    const loadImage = () => {
+      setImageSrc(src)
+    }
+
+    if (priority) {
+      loadImage()
+    } else {
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(loadImage, { timeout: 2000 })
+      } else {
+        setTimeout(loadImage, 100)
+      }
+    }
+  }, [src, priority])
+
+  return (
+    <div className="relative w-full h-full">
+      {isLoading && (
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-pink-900/20 animate-pulse" />
+      )}
+      {imageSrc && (
+        <Image
+          src={imageSrc}
+          height={256}
+          width={256}
+          className="object-cover rounded-lg"
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          quality={75}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          onLoadingComplete={() => setIsLoading(false)}
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect fill='%23391f5c' width='256' height='256'/%3E%3C/svg%3E"
+        />
+      )}
+    </div>
+  )
+}
+
+const ProductCard = ({ 
+  product, 
+  showWorkerOptions, 
+  getLocationText,
+  priority = false 
+}: { 
   product: ProductForm; 
   showWorkerOptions: boolean;
   getLocationText: (store1: number, store2: number) => string;
+  priority?: boolean;
 }) => (
   <motion.div
     layout
@@ -29,15 +87,11 @@ const ProductCard = ({ product, showWorkerOptions, getLocationText }: {
   >
     <div className="h-48 md:h-64 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center">
-      <Image
-  src={product.image || "/placeholder.svg"}
-  height={256}
-  width={256}
-  className="object-cover rounded-lg"
-  alt={product.name}
-  loading="lazy"
-  quality={75}
-/>
+        <OptimizedProductImage 
+          src={product.image || "/placeholder.svg"} 
+          alt={product.name}
+          priority={priority}
+        />
       </div>
 
       <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -101,10 +155,12 @@ const ProductCard = ({ product, showWorkerOptions, getLocationText }: {
 
 export default function ProductsPage() {
   const [mounted, setMounted] = useState(false);
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 6 })
 
   useEffect(() => {
     setMounted(true);
   }, []);
+  
   const [brands, setBrands] = useState<string[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>("")
@@ -393,6 +449,7 @@ export default function ProductsPage() {
   )
   
   if (!mounted) return null;
+  
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
@@ -468,12 +525,13 @@ export default function ProductsPage() {
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <AnimatePresence mode="popLayout">
                 {isOnline &&
-                  displayedProducts.map((product) => (
+                  displayedProducts.map((product, index) => (
                     <ProductCard 
                       key={product.id} 
                       product={product} 
                       showWorkerOptions={showWorkerOptions}
                       getLocationText={getLocationText}
+                      priority={index < 6}
                     />
                   ))}
               </AnimatePresence>

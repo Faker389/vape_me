@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import Link from "next/link"
 import { AlertCircle, ArrowLeft, Plus, Save, Upload, X } from "lucide-react"
-import { auth, db, storage } from "@/lib/firebase"
+import { auth, db, getCurrentUser, storage } from "@/lib/firebase"
 import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
 import { ProductForm } from "@/lib/productModel"
@@ -156,7 +156,6 @@ export default function AddProductPage() {
     setFormData({ ...formData, specifications: updatedSpecs })
   }
   const handleInputChange = (field: keyof productTemp, value: ProductFieldValue) => {
-    console.log(field , typeof value)
     if (field === "id" && typeof value === "number") {
       checkIfExists(value)
       return
@@ -250,7 +249,7 @@ export default function AddProductPage() {
     if (formData.imageFile) {
       fileBlob = formData.imageFile;
     } else if (formData.image && formData.image.trim() !== "") {
-      const idToken = auth.currentUser?.getIdToken();
+      const idToken = await getCurrentUser();
       try {
         const res = await fetch("/api/download-image", {
           method: "POST",
@@ -269,7 +268,7 @@ export default function AddProductPage() {
       try {
         const formDataBg = new FormData();
         formDataBg.append("file", fileBlob, "input.png");
-        const idToken = auth.currentUser?.getIdToken();
+        const idToken = await getCurrentUser();
         const bgRes = await fetch("/api/remove_bg", {
           headers:{
             "Authorization": `Bearer ${idToken}`,
@@ -331,7 +330,6 @@ export default function AddProductPage() {
     }
   };
   useEffect(() => {
-    console.log(formData.imageFile)
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
         window.location.href = "/"
@@ -345,8 +343,16 @@ export default function AddProductPage() {
         setFocused(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", (e)=>{
+      setTimeout(() => {
+        handleClickOutside(e)  
+      }, 1000);
+      });
+    return () => document.removeEventListener("mousedown", (e)=>{
+      setTimeout(() => {
+        handleClickOutside(e)  
+      }, 1000);
+      });
   }, []);
   if (!mounted) return null;
   return (

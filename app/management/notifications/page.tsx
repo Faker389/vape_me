@@ -10,7 +10,7 @@ import axios from "axios"
 import { OfflineBanner } from "@/components/offline-banner"
 import { ErrorToast } from "@/components/error-toast"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
-import { auth } from "@/lib/firebase"
+import { auth, getCurrentUser } from "@/lib/firebase"
 
 interface NotificationData {
   title: string
@@ -78,7 +78,7 @@ export default function NotificationsPage() {
     }
     setIsSending(true)
     const user = auth.currentUser;
-    const idToken = await user?.getIdToken();
+    const idToken = await getCurrentUser();
 
     try {
       await axios.post("/api/send_notification/all", {

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Edit, X, Save, Upload, Plus, AlertCircle } from "lucide-react"
-import { auth, db, storage } from "@/lib/firebase"
+import { auth, db, getCurrentUser, storage } from "@/lib/firebase"
 import {  doc, updateDoc } from "firebase/firestore"
 import { ProductForm } from "@/lib/productModel"
 import { useProductsStore } from "@/lib/storage"
@@ -149,10 +149,10 @@ export default function ItemsManagementPage() {
       fileBlob = formData.imageFile;
     } else if (formData.image && formData.image.trim() !== "") {
       try {
-        const token = await auth.currentUser?.getIdToken()
+        const idToken = await getCurrentUser();
         const res = await fetch("/api/download-image", {
           method: "POST",
-          headers: { "Content-Type": "application/json","Authorization":`Bearer ${token}` },
+          headers: { "Content-Type": "application/json","Authorization":`Bearer ${idToken}` },
           body: JSON.stringify({ url: formData.image }),
         });
         if (!res.ok) throw new Error("Image download failed");
@@ -167,12 +167,12 @@ export default function ItemsManagementPage() {
       try {
         const formDataBg = new FormData();
         formDataBg.append("file", fileBlob, "input.png");
-        const token = await auth.currentUser?.getIdToken()
+        const idToken = await getCurrentUser();
         const bgRes = await fetch("/api/remove_bg", {
           method: "POST",
           body: formDataBg,
           headers:{
-            "Authorization":`Bearer ${token}`
+            "Authorization":`Bearer ${idToken}`
           }
         });
 

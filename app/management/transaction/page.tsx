@@ -5,7 +5,7 @@
   import Link from "next/link"
   import Image from "next/image"
   import { ArrowLeft, CheckCircle, XCircle, ShoppingCart, Tag, CreditCard, X, AlertCircle, Plus } from "lucide-react"
-  import { auth, currentDate, db, transactions } from "@/lib/firebase"
+  import { auth, currentDate, db, getCurrentUser, transactions } from "@/lib/firebase"
   import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
   import { arrayUnion, collection, doc, getDoc, getDocs, where, increment, query, updateDoc, writeBatch, onSnapshot } from "firebase/firestore"
   import axios from "axios"
@@ -281,8 +281,8 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
       try {
         const data = docSnapUser.data();
           const fcmToken = data.token ?? "";
-          const token = auth.currentUser?.getIdToken()
-           await axios.post("/api/send_notification", {
+          const idToken = await getCurrentUser();
+          await axios.post("/api/send_notification", {
             title: "Otrzymujesz nowe buszki!",
             body: `Za twój ostatni zakup przyznaliśmy ci ${totalPoints} buszków!`,
             priority: "high",
@@ -290,7 +290,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
             notificationType: "pointsActivity",
           },{
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${idToken}`,
             }
           });
           return true;
@@ -334,8 +334,16 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
           setFocused(false);
         }
       }
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", (e)=>{
+      setTimeout(() => {
+        handleClickOutside(e)  
+      }, 1000);
+      });
+      return () => document.removeEventListener("mousedown", (e)=>{
+      setTimeout(() => {
+        handleClickOutside(e)  
+      }, 1000);
+      });
     }, []);
   
     useEffect(() => {
