@@ -8,19 +8,15 @@ import { useProductsStore } from "@/lib/storage"
 import { ProductForm } from "@/lib/productModel"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 import { AlertCircle, X } from 'lucide-react'
-import { auth } from "@/lib/firebase"
+import ContactForm from "./ContactForm"
 export const dynamic = 'force-dynamic'
 interface EmailInterface{
-  name:string
-email:string
-subject:string
-message:string
+  title:string
+  message:string
 }
 const initialForm ={
-  name:"",
-  email:"vapeme123321@gmail.com",
-  subject:"",
-  message:""
+  title:"",
+  message:"",
 }
 interface Alert {
   id: string
@@ -92,7 +88,7 @@ export default function Home() {
   
     const res = await fetch("/api/send_email", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json"},
       body: JSON.stringify(formData),
     });
   
@@ -169,7 +165,7 @@ export default function Home() {
               transition={{ duration: 0.8 }}
             >
               <motion.h1
-                className="text-6xl md:text-7xl mt-[-2rem] flex-wrap font-bold leading-tight gap-8 flex"
+                className=" text-5xl    sm:text-6xl md:text-7xl mt-[-2rem] flex-wrap font-bold leading-tight gap-8 flex"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -194,15 +190,29 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-wrap gap-4 w-fit"
+              className="flex flex-wrap gap-4"
             >
-              <a href="/vape me.apk" className="cursor-pointer">
+              <a href="/vape me.apk" download className="cursor-pointer">
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)" }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r cursor-pointer from-purple-500 to-pink-500 rounded-full text-white font-bold text-lg glow-effect"
+                  className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-white font-bold text-lg glow-effect flex items-center gap-3"
                 >
-                  Pobierz Aplikację
+                <Image src="/android-logo.svg" alt="Android Logo" width={20} height={20} />
+                  Pobierz na Android
+                </motion.button>
+              </a>
+
+              <a href="/vape me.ipa" download className="cursor-pointer">
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(236, 72, 153, 0.5)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full text-white font-bold text-lg glow-effect flex items-center gap-3"
+                >
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                  </svg>
+                  Pobierz na iOS
                 </motion.button>
               </a>
 
@@ -316,51 +326,9 @@ export default function Home() {
             className="glass-effect rounded-3xl p-12"
           >
             <h2 className="text-5xl font-bold gradient-text mb-4 text-center">Skontaktuj Się Z Nami</h2>
-            <p className="text-gray-400 text-center mb-12">Masz pytania? Chętnie pomożemy!</p>
+            <p className="text-gray-400 text-center mb-12">Masz pytania lub propozycje? Chętnie o nich usłyszymy</p>
 
-            <form className="space-y-6" onSubmit={handleSend}>
-              <div className="grid  gap-6">
-                <motion.div whileFocus={{ scale: 1.02 }}>
-                  <input
-                  value={formData.name}
-                onChange={(e)=>setFormData({...formData,name:e.target.value})}
-
-                    type="text"
-                    placeholder="Imię i Nazwisko"
-                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-all text-white"
-                  />
-                </motion.div>
-              </div>
-
-              <motion.div whileFocus={{ scale: 1.02 }}>
-                <input
-                value={formData.subject}
-                  type="text"
-                onChange={(e)=>setFormData({...formData,subject:e.target.value})}
-
-                  placeholder="Temat"
-                  className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-all text-white"
-                />
-              </motion.div>
-
-              <motion.div whileFocus={{ scale: 1.02 }}>
-                <textarea
-                value={formData.message}
-                onChange={(e)=>setFormData({...formData,message:e.target.value})}
-                  placeholder="Wiadomość"
-                  rows={6}
-                  className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none transition-all resize-none text-white"
-                />
-              </motion.div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-bold text-lg glow-effect"
-              >
-                Wyślij Wiadomość
-              </motion.button>
-            </form>
+            <ContactForm showAlert={showAlert} />
           </motion.div>
         </div>
       </section>

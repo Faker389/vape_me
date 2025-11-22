@@ -17,7 +17,7 @@ export default function ClientLayout({
   const [showWorkerOptions, setShowWorkerOptions] = useState<boolean>(false)
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user?.email === "malgorzatamagryso2.pl@gmail.com"||user?.email==="vapeme123321@gmail.com") {
+      if (user?.email === "malgorzatamagryso2.pl@gmail.com" || user?.email === "vapeme123321@gmail.com") {
         setShowWorkerOptions(true)
       } else {
         setShowWorkerOptions(false)
@@ -43,7 +43,6 @@ export default function ClientLayout({
                   height={110}
                   className=" mt-[-10px] object-contain"
                 />
-
               </div>
             </motion.div>
           </Link>
@@ -76,24 +75,40 @@ export default function ClientLayout({
               </Link>
             )}
 
-            <a href="/vape me.apk">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-3 py-2 sm:px-4 md:px-6 cursor-pointer bg-gradient-to-r glow-effect from-purple-500 to-pink-500 rounded-full text-white font-semibold text-xs sm:text-sm md:text-base flex items-center gap-1.5"
-              >
-                <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Pobierz</span>
-              </motion.button>
-            </a>
+            <div className="flex items-center gap-2">
+              {/* Android Download Button */}
+              <a href="/vape me.apk" download>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-3 py-2 sm:px-4 md:px-6 cursor-pointer bg-gradient-to-r glow-effect from-purple-500 to-pink-500 rounded-full text-white font-semibold text-xs sm:text-sm md:text-base flex items-center gap-1.5 shadow-lg hover:shadow-purple-500/50 transition-shadow"
+                >
+                <Image src="/android-logo.svg" alt="Android Logo" width={16} height={16} />
+
+                  <span className="hidden sm:inline">Android</span>
+                </motion.button>
+              </a>
+
+              {/* iOS Download Button */}
+              <a href="/vape me.ipa" download>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-3 py-2 sm:px-4 md:px-6 cursor-pointer bg-gradient-to-r glow-effect from-pink-500 to-purple-500 rounded-full text-white font-semibold text-xs sm:text-sm md:text-base flex items-center gap-1.5 shadow-lg hover:shadow-pink-500/50 transition-shadow"
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                  </svg>
+                  <span className="hidden sm:inline">iOS</span>
+                </motion.button>
+              </a>
+            </div>
           </div>
         </div>
       </motion.nav>
       <AgeVerificationModal />
       {/* Add pt-20 for mobile, pt-24 for tablet and up to account for fixed navbar height */}
-      <div className="pt-20 sm:pt-24">
-        {children}
-      </div>
+      <div className="pt-20 sm:pt-24">{children}</div>
     </main>
   )
 }

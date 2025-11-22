@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { auth } from "@/lib/firebase"
 import { useEffect } from "react"
-import { Package, PlusCircle, Receipt, Bell, Gift } from "lucide-react"
+import { Package, PlusCircle, Receipt, Bell, Gift, MessageSquare } from "lucide-react"
 import { OfflineBanner } from "@/components/offline-banner"
 export const dynamic = 'force-dynamic'
 
@@ -53,6 +53,13 @@ export default function ManagementPage() {
       icon: Gift,
       href: "/management/coupons",
       gradient: "from-emerald-500 to-teal-500",
+    },
+    {
+      title: "Wiadomości",
+      description: "Przeglądaj wiadomości od użytkowników",
+      icon: MessageSquare,
+      href: "/management/messages",
+      gradient: "from-violet-500 to-purple-500",
     },
   ]
 

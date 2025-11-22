@@ -1,6 +1,6 @@
 import "../../app/globals.css";
 export const metadata = {
-  title: 'Vape Me',
+  title: 'Vape me - management',
   description: 'Your vape shop description',
 }
 
