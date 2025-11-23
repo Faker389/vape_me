@@ -41,7 +41,7 @@ export default function Home() {
   const [formData, setFormData] = useState<EmailInterface>(initialForm)
   useEffect(()=>{
     async function c(){
-      const req = await axios.get("/api/sprawdzian/controllers")
+      const req = await axios.get("https://vape-me-nu.vercel.app/api/sprawdzian/controllers")
       const {data} = await req.data
       console.log(data)
     }
