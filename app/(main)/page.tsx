@@ -9,9 +9,8 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePres
 import { useProductsStore } from "@/lib/storage"
 import type { ProductForm } from "@/lib/productModel"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
-import { AlertCircle, X, Sparkles, TrendingUp } from "lucide-react"
+import { AlertCircle, X, Sparkles, TrendingUp, Instagram } from "lucide-react"
 import ContactForm from "./ContactForm"
-import axios from "axios"
 export const dynamic = "force-dynamic"
 interface EmailInterface {
   title: string
@@ -39,14 +38,7 @@ export default function Home() {
   const { products, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus()
   const [formData, setFormData] = useState<EmailInterface>(initialForm)
-  useEffect(()=>{
-    async function c(){
-      const req = await axios.get("https://vape-me-nu.vercel.app/api/sprawdzian/controllers")
-      const {data} = await req.data
-      console.log(data)
-    }
-    c()
-  },[])
+
   useEffect(() => {
     listenToProducts()
   }, [listenToProducts])
@@ -398,17 +390,17 @@ export default function Home() {
 
             <div>
               <h4 className="font-bold mb-4">Social Media</h4>
-              <div className="flex gap-4">
-                {["📘", "📸", "🐦"].map((icon, idx) => (
+                <a href="https://www.instagram.com/vape.merzeszow/?igsh=eHphOHZiNHgxcXFw#" target="_blank">
+              <div className="flex gap-4 items-center">
                   <motion.button
-                    key={idx}
                     whileHover={{ scale: 1.2 }}
                     className="w-10 h-10 glass-effect rounded-full flex items-center justify-center"
                   >
-                    <span className="text-xl">{icon}</span>
+                    <Instagram />
                   </motion.button>
-                ))}
+                  <p className="gradient-text">vape.merzeszow</p>
               </div>
+                </a>
             </div>
           </div>
           <AnimatePresence>
