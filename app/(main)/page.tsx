@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import Link from "next/link"
@@ -451,6 +452,7 @@ const ProductBadge = ({ variant }: { variant: "bestseller" | "new" }) => {
   )
 }
 
+
 const InfiniteScrollSection = ({
   title,
   subtitle,
@@ -462,31 +464,36 @@ const InfiniteScrollSection = ({
   direction: "left" | "right"
   products: ProductForm[]
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef(null)
   const x = useMotionValue(0)
   const springX = useSpring(x, { stiffness: 100, damping: 30, mass: 0.5 })
   const [isPaused, setIsPaused] = useState(false)
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true)
   const animationRef = useRef<number>(0)
+  const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Calculate total width for seamless loop
-  const cardWidth = 288 + 24 // 72 * 4 (w-72) + gap-6
-  const totalWidth = cardWidth * products.length
+  const cardWidth = 288 + 24 // w-72 + gap-6
+  const totalWidth = cardWidth * (products.length > 0 ? products.length : 1)
+  
+  // Demo products if none provided
+  const demoProducts = products.length > 0 ? products : [
+    { id: 1, name: "Product 1", description: "Amazing quality", price: 99.99, image: "🎮" },
+    { id: 2, name: "Product 2", description: "Best seller", price: 129.99, image: "🎧" },
+    { id: 3, name: "Product 3", description: "New arrival", price: 149.99, image: "⌚" },
+    { id: 4, name: "Product 4", description: "Premium item", price: 199.99, image: "📱" },
+    { id: 5, name: "Product 5", description: "Top rated", price: 89.99, image: "🎮" }
+  ]
 
+  // Auto-scroll animation
   useEffect(() => {
-    if (isPaused) {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
-      return
-    }
+    if (isPaused || !isAutoScrolling) return
 
     const animate = () => {
       const currentX = x.get()
       const speed = direction === "left" ? -0.8 : 0.8
-
       const newX = currentX + speed
 
-      // Seamless loop
+      // Seamless loop - reset when reaching half the total width
       if (direction === "left" && newX <= -totalWidth / 2) {
         x.set(0)
       } else if (direction === "right" && newX >= 0) {
@@ -505,23 +512,40 @@ const InfiniteScrollSection = ({
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [x, direction, totalWidth, isPaused])
+  }, [x, direction, totalWidth, isPaused, isAutoScrolling])
+
+  // Handle pause with auto-resume
+  const handlePause = useCallback(() => {
+    setIsPaused(true)
+    setIsAutoScrolling(false)
+
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current)
+    }
+
+    pauseTimeoutRef.current = setTimeout(() => {
+      setIsPaused(false)
+      setIsAutoScrolling(true)
+    }, 2000)
+  }, [])
 
   const handleTouchStart = useCallback(() => {
-    setIsPaused(true)
-  }, [])
-
-  const handleTouchEnd = useCallback(() => {
-    setIsPaused(false)
-  }, [])
+    handlePause()
+  }, [handlePause])
 
   const handleDragStart = useCallback(() => {
-    setIsPaused(true)
-  }, [])
+    handlePause()
+  }, [handlePause])
 
   const handleDragEnd = useCallback(() => {
     setIsPaused(false)
   }, [])
+
+  const manualScroll = useCallback((direction: 'prev' | 'next') => {
+    handlePause()
+    const moveAmount = cardWidth * (direction === 'next' ? -1 : 1)
+    x.set(x.get() + moveAmount)
+  }, [x, cardWidth, handlePause])
 
   return (
     <section className="pb-20 relative overflow-hidden">
@@ -541,7 +565,6 @@ const InfiniteScrollSection = ({
         className="relative cursor-grab active:cursor-grabbing"
         ref={containerRef}
         onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
       >
         <motion.div
           className="flex gap-6"
