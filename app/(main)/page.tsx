@@ -11,6 +11,7 @@ import type { ProductForm } from "@/lib/productModel"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 import { AlertCircle, X, Sparkles, TrendingUp, Instagram } from "lucide-react"
 import ContactForm from "./ContactForm"
+import ClientLayout from "./clientLayout"
 export const dynamic = "force-dynamic"
 interface EmailInterface {
   title: string
@@ -113,7 +114,7 @@ export default function Home() {
   }
   if (!mounted) return null
   return (
-    <>
+    <ClientLayout>
       <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
         <AnimatePresence>
           {alerts.map((alert) => (
@@ -423,7 +424,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </>
+    </ClientLayout>
   )
 }
 
