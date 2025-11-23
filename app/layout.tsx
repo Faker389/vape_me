@@ -26,7 +26,7 @@ export const metadata = {
 }
 
 export default function SpecialLayout({ children }: { children: React.ReactNode }) {
-    return <html lang="pl" style={{ height: '100%', margin: 0, padding: 0 }} className="scroll-smooth">
+    return <html lang="pl" style={{ margin: 0, padding: 0 }} className="scroll-smooth">
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, minimum-scale=1, maximum-scale=5, user-scalable=yes" />
