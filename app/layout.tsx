@@ -27,7 +27,7 @@ export const metadata = {
 }
 
 export default function SpecialLayout({ children }: { children: React.ReactNode }) {
-    return <html lang="pl" style={{ height: '100dvh', margin: 0, padding: 0, overflow: 'hidden' }}>
+    return <html lang="pl" style={{ height: '100%', margin: 0, padding: 0 }}>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, minimum-scale=1, maximum-scale=5, user-scalable=yes" />
@@ -51,11 +51,10 @@ export default function SpecialLayout({ children }: { children: React.ReactNode 
         style={{ 
           margin: 0, 
           padding: 0, 
-          height: '100dvh',
-          overflow: 'hidden',
+          height: '100%',
         }}
       >
-        <div style={{ height: '100%', overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {children}
         </div>
       </body>

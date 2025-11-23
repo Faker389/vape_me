@@ -115,7 +115,7 @@ export default function Home() {
   if (!mounted) return null
   return (
     <ClientLayout>
-      <div className="fixed top-8 right-8 z-50 space-y-3 max-w-md">
+      <div className="fixed top-8 right-8  space-y-3 max-w-md">
         <AnimatePresence>
           {alerts.map((alert) => (
             <motion.div
