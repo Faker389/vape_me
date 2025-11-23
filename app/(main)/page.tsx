@@ -230,24 +230,6 @@ export default function Home() {
                 </motion.button>
               </Link>
             </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isVisible ? 1 : 0 }}
-              transition={{ delay: 0.8 }}
-              className="grid grid-cols-3 gap-10 pt-8 w-fit"
-            >
-              {[
-                { number: "10K+", label: "Użytkowników" },
-                { number: "500+", label: "Produktów" },
-                { number: "50K+", label: "Nagród" },
-              ].map((stat, idx) => (
-                <motion.div key={idx} whileHover={{ y: -5 }} className="text-center">
-                  <div className="text-3xl font-bold gradient-text">{stat.number}</div>
-                  <div className="text-sm text-gray-400">{stat.label}</div>
-                </motion.div>
-              ))}
-            </motion.div>
           </div>
         </motion.div>
       </section>
