@@ -11,6 +11,7 @@ import type { ProductForm } from "@/lib/productModel"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 import { AlertCircle, X, Sparkles, TrendingUp } from "lucide-react"
 import ContactForm from "./ContactForm"
+import axios from "axios"
 export const dynamic = "force-dynamic"
 interface EmailInterface {
   title: string
@@ -38,6 +39,14 @@ export default function Home() {
   const { products, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus()
   const [formData, setFormData] = useState<EmailInterface>(initialForm)
+  useEffect(()=>{
+    async function c(){
+      const req = await axios.get("/api/sprawdzian/controllers")
+      const {data} = await req.data
+      console.log(data)
+    }
+    c()
+  },[])
   useEffect(() => {
     listenToProducts()
   }, [listenToProducts])
