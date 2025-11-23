@@ -20,7 +20,6 @@ export const metadata = {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
-  themeColor: '#0a0a0f',
   formatDetection: {
     telephone: false,
   },
