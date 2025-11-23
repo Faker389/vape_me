@@ -27,7 +27,7 @@ export const metadata = {
 }
 
 export default function SpecialLayout({ children }: { children: React.ReactNode }) {
-    return <html lang="pl" style={{ height: '100%', margin: 0, padding: 0 }}>
+    return <html lang="pl" style={{ height: '100%', margin: 0, padding: 0 }} className="scroll-smooth">
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, minimum-scale=1, maximum-scale=5, user-scalable=yes" />
@@ -46,17 +46,8 @@ export default function SpecialLayout({ children }: { children: React.ReactNode 
         
         <meta name="user-scalable" content="no" />
       </head>
-      <body 
-        className={`font-sans antialiased`}
-        style={{ 
-          margin: 0, 
-          padding: 0, 
-          height: '100%',
-        }}
-      >
-        <div style={{ flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          {children}
-        </div>
+      <body className="font-sans antialiased bg-[#0a0a0f]">
+        {children}
       </body>
     </html>
   }

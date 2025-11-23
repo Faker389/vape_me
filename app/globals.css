@@ -119,7 +119,11 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
 }
-
+:root {
+  /* Set the background color here to match your design 
+     This prevents white flashes during overscroll on mobile */
+  --background-start: #0a0a0f; 
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -131,9 +135,9 @@
 body {
   margin: 0;
   padding: 0;
-  height: 100dvh;
-  height: 100vh; /* Fallback for browsers that don't support dvh */
+  min-height: 100dvh; /* Use min-height, NOT height */
   overflow-x: hidden;
+  background-color: var(--background-start);
 }
 
 #__next {
