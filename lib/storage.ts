@@ -6,6 +6,7 @@ import { ProductForm } from "./productModel"
 
 interface ProductStore {
   products: ProductForm[]
+  rawproducts: ProductForm[]
   isLoaded: boolean
   unsubscribe?: () => void
   listenToProducts: () => void
@@ -13,6 +14,7 @@ interface ProductStore {
 
 export const useProductsStore = create<ProductStore>((set, get) => ({
   products: [],
+  rawproducts: [],
   isLoaded: false,
 
   listenToProducts: () => {
@@ -20,8 +22,16 @@ export const useProductsStore = create<ProductStore>((set, get) => ({
 
     const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
       const data = snapshot.docs.map((doc) => doc.data() as ProductForm)
-      set({ products: data, isLoaded: true })
+      set({ rawproducts: data, isLoaded: true })
+    
+      const tempData = data.map((e) => ({
+        ...e,
+        name: e.name.replace(/&/g, "")
+      }))
+    
+      set({ products: tempData, isLoaded: true })
     })
+    
 
     set({ unsubscribe: unsub })
   },

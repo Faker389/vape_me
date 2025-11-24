@@ -4,11 +4,13 @@ import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { AnimatePresence, motion } from "framer-motion"
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from "next/navigation"
 import { useProductsStore } from "@/lib/storage"
 import type { ProductForm } from "@/lib/productModel"
-import { Loader2, X } from 'lucide-react'
+import { Loader2, X } from "lucide-react"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
+import { collection, onSnapshot } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 
 export const dynamic = "force-dynamic"
 
@@ -34,9 +36,7 @@ const RelatedProductCard = ({ product }: { product: ProductForm }) => (
         <div className="text-lg md:text-xl font-bold gradient-text">{product.price} zł</div>
         <div className="flex flex-wrap gap-1 md:gap-2 mt-2">
           {product.isNew && (
-            <span className="inline-block text-xs px-2 py-1 bg-purple-500/20 rounded-full text-purple-300">
-              NOWOŚĆ
-            </span>
+            <span className="inline-block text-xs px-2 py-1 bg-purple-500/20 rounded-full text-purple-300">NOWOŚĆ</span>
           )}
           {product.isBestseller && (
             <span className="inline-block text-xs px-2 py-1 bg-orange-500/20 rounded-full text-orange-300">
@@ -50,18 +50,19 @@ const RelatedProductCard = ({ product }: { product: ProductForm }) => (
 )
 
 export default function ProductDetailPage() {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
   const params = useParams()
+  const router = useRouter()
   const id = params.id as string
   const [product, setProduct] = useState<ProductForm>()
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
-  const { products, listenToProducts } = useProductsStore()
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null)
+  const { products,rawproducts, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus()
-
   useEffect(() => {
     listenToProducts()
   }, [listenToProducts])
@@ -73,7 +74,7 @@ export default function ProductDetailPage() {
 
   const relatedProducts = useMemo(() => {
     if (!product || products.length === 0) return []
-    
+
     const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4)
 
     if (related.length < 4) {
@@ -89,7 +90,12 @@ export default function ProductDetailPage() {
     if (text.length <= maxLength) return text
     return text.slice(0, maxLength) + "..."
   }
-  if (!mounted) return null;
+
+  const handleThumbnailClick = (id: string) => {
+    router.push(`/products/${id}`)
+  }
+ 
+  if (!mounted) return null
   return (
     <>
       {product ? (
@@ -161,6 +167,67 @@ export default function ProductDetailPage() {
                   <span className="text-xs md:text-sm text-gray-400">{product!.brand}</span>
                 </div>
                 <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-4">{product!.name}</h1>
+
+                <div className="mb-6">
+                  <div className="flex gap-3 flex-wrap mb-4">
+                    {products.filter((e)=>e.brand===product!.brand).map((e: ProductForm, idx: number) => (
+                      <motion.div
+                        key={idx}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onMouseEnter={() => setHoveredImage(e.image)}
+                        onMouseLeave={() => setHoveredImage(null)}
+                        onClick={() => handleThumbnailClick(e.id.toString())}
+                        className="relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden cursor-pointer glass-effect border-2 border-transparent hover:border-purple-500 transition-all"
+                      >
+                        <Image
+                          src={e.image || "/placeholder.svg"}
+                          alt={`${product.name}`}
+                          fill
+                          className="object-cover"
+                          sizes="80px"
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                  {hoveredImage && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="glass-effect rounded-2xl p-4 border border-purple-500/30"
+                      >
+                        <div className="relative  h-48 md:h-64 rounded-xl overflow-hidden mb-3">
+                          <Image
+                            src={hoveredImage || "/placeholder.svg"}
+                            alt="Preview"
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg border border-purple-500/30">
+                            <span className="text-xs font-semibold text-purple-300 flex-shrink-0">Smak:</span>
+                            <span className="text-sm font-bold gradient-text truncate">
+                              {rawproducts
+                                .filter((e) => e.id == product.id)[0]
+                                ?.name.slice(
+                                  rawproducts.filter((e) => e.id == product.id)[0].name.indexOf("&") + 1,
+                                  rawproducts.filter((e) => e.id == product.id)[0].name.lastIndexOf("&"),
+                                )
+                                .trim()}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               {product.description && (
@@ -252,7 +319,7 @@ export default function ProductDetailPage() {
               </motion.div>
             )}
 
-            {product.specifications&&Object.entries(product.specifications).length > 0&& (
+            {product.specifications && Object.entries(product.specifications).length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

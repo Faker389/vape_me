@@ -136,6 +136,7 @@ html{
   min-height: 100dvh; /* Use min-height, NOT height */
 }
 body {
+  color: rgb(233, 222, 222);
   margin: 0;
   padding: 0;
   min-height: 100dvh; /* Use min-height, NOT height */
