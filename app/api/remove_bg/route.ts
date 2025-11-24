@@ -1,3 +1,4 @@
+"use server";
 import { NextResponse } from "next/server";
 import axios, { AxiosError } from "axios";
 import admin from "firebase-admin";

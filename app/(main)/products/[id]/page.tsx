@@ -9,8 +9,6 @@ import { useProductsStore } from "@/lib/storage"
 import type { ProductForm } from "@/lib/productModel"
 import { Loader2, X } from "lucide-react"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
-import { collection, onSnapshot } from "firebase/firestore"
-import { db } from "@/lib/firebase"
 
 export const dynamic = "force-dynamic"
 
@@ -170,7 +168,7 @@ export default function ProductDetailPage() {
 
                 <div className="mb-6">
                   <div className="flex gap-3 flex-wrap mb-4">
-                    {products.filter((e)=>e.brand===product!.brand).map((e: ProductForm, idx: number) => (
+                    {product.category=="Liquidy"&&products.filter((e)=>e.brand===product!.brand).map((e: ProductForm, idx: number) => (
                       <motion.div
                         key={idx}
                         whileHover={{ scale: 1.05 }}
@@ -212,16 +210,18 @@ export default function ProductDetailPage() {
 
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg border border-purple-500/30">
-                            <span className="text-xs font-semibold text-purple-300 flex-shrink-0">Smak:</span>
+                            {rawproducts
+                                .filter((e) => e.image == hoveredImage)[0]
+                                ?.name.includes("&")&&<><span className="text-xs font-semibold text-purple-300 flex-shrink-0">Smak:</span>
                             <span className="text-sm font-bold gradient-text truncate">
                               {rawproducts
-                                .filter((e) => e.id == product.id)[0]
+                                .filter((e) => e.image == hoveredImage)[0]
                                 ?.name.slice(
-                                  rawproducts.filter((e) => e.id == product.id)[0].name.indexOf("&") + 1,
-                                  rawproducts.filter((e) => e.id == product.id)[0].name.lastIndexOf("&"),
+                                  rawproducts.filter((e) => e.image == hoveredImage)[0].name.indexOf("&") + 1,
+                                  rawproducts.filter((e) => e.image == hoveredImage)[0].name.lastIndexOf("&"),
                                 )
                                 .trim()}
-                            </span>
+                            </span></>}
                           </div>
                         </div>
                       </motion.div>
