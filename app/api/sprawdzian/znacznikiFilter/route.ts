@@ -1,4 +1,5 @@
 
+"use server";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -29,7 +30,6 @@ export async function GET() {
         {organizer:1,reservationID:1}
     )`
 
-    "use server";
     const res = NextResponse.json({data});
     res.headers.set("Access-Control-Allow-Origin", "*");
     res.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
