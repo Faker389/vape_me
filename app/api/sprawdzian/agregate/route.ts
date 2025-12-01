@@ -5,32 +5,43 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
 
-    const data = ` const data = await ReservationsModel.aggregate([
-        {
-            $match:{ilePracownikow:{$gt:1}}
-        },
-            {
-              $group: {
-                _id: "$time",
-                minimalnaID: { $sum: "$reservationID" },
-                ilePracownikow: { $count: {} }
-              }
-            },
-           
-            {
-              $sort: { minimalnaID: 1 } // 1 rosnaco -1 malejaco
-              
-            },
-            {
-                $project:{
-                    _id:0, // wywietlanie 1- true 0 - false
-                    minimalnaID:1,
-                    ilePracownikow:1    
-                }
-            },{
-                $limit:2
-            }
-          ]);`
+    const data = ` 
+    $sum	sum values
+$avg	average
+$min	minimum
+$max	maximum
+$push	push values into array
+$addToSet	push only unique values
+$count	(in 5.0+) count documents
+      {
+  $group: {
+    _id: "$country",
+    totalUsers: { $sum: 1 },
+    avgAge: { $avg: "$age" },
+    youngest: { $min: "$age" },
+    oldest: { $max: "$age" },
+    allNames: { $push: "$name" },
+    uniqueRoles: { $addToSet: "$role" }
+  }
+}
+
+$concat	join strings
+$substr / $substrCP	substring
+$toUpper	uppercase
+$toLower	lowercase
+$strLenCP	string length
+$add, $subtract, $multiply, $divide, $mod	math
+    
+{
+  $project: {
+    fullName: { $concat: ["$firstName", " ", "$lastName"] },
+    nameLength: { $strLenCP: "$firstName" },
+    yearOfBirth: { $subtract: [2025, "$age"] }
+  }
+}
+
+    
+    `
 
     const res = NextResponse.json({data});
     res.headers.set("Access-Control-Allow-Origin", "*");
