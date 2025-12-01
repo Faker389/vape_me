@@ -1,3 +1,5 @@
+
+
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -5,28 +7,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
 
-    const data = `// models/Product.js
-const mongoose = require("mongoose");
-
-const productSchema = new mongoose.Schema({
-  nazwa: { type: String, required: true, trim: true },
-  cena: { type: Number, required: true, min: 0 },
-  rabat: { type: Number, required: true, min: 0, max: 100 },
-  kategoria: { 
-    type: String, 
-    required: true, 
-    enum: ['Elektronika', 'AGD', 'RTV', 'Akcesoria', 'Inne']
-  },
-  opakowanie: {
-    type: String,
-    required: true,
-    enum: ['Pudełko', 'Folia', 'Blister', 'Folia bąbelkowa']
-  },
-  gwarancjaMiesiace: { type: Number, required: true, min: 1 },
-  utworzono: { type: Date, default: Date.now }
-});
-
-module.exports = mongoose.model("Product", productSchema);`
+    const data = `const express = require("express");
+    const router = express.Router();
+    const { filterProducts } = require("../kontroler/ProduktKontroler.js");
+    
+    router.get("/filter", filterProducts);
+    
+    module.exports = router;`
 
     const res = NextResponse.json({data});
     res.headers.set("Access-Control-Allow-Origin", "*");

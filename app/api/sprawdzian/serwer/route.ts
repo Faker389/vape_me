@@ -1,3 +1,4 @@
+
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -5,28 +6,31 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
 
-    const data = `// models/Product.js
+    const data = `const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
-const productSchema = new mongoose.Schema({
-  nazwa: { type: String, required: true, trim: true },
-  cena: { type: Number, required: true, min: 0 },
-  rabat: { type: Number, required: true, min: 0, max: 100 },
-  kategoria: { 
-    type: String, 
-    required: true, 
-    enum: ['Elektronika', 'AGD', 'RTV', 'Akcesoria', 'Inne']
-  },
-  opakowanie: {
-    type: String,
-    required: true,
-    enum: ['Pudełko', 'Folia', 'Blister', 'Folia bąbelkowa']
-  },
-  gwarancjaMiesiace: { type: Number, required: true, min: 1 },
-  utworzono: { type: Date, default: Date.now }
+const productRoutes = require("./Routes/products.js");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// 🔌 Połączenie z MongoDB
+mongoose
+  .connect("mongodb://localhost:27017/produktyDB")
+  .then(() => console.log("Połączono z MongoDB"))
+  .catch(err => console.error("Błąd połączenia:", err));
+
+// Routy
+app.use("/products", productRoutes);
+
+// Start serwera
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(Server działa na http://localhost:3000);
 });
-
-module.exports = mongoose.model("Product", productSchema);`
+`
 
     const res = NextResponse.json({data});
     res.headers.set("Access-Control-Allow-Origin", "*");
