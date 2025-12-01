@@ -9,6 +9,7 @@ import { useProductsStore } from "@/lib/storage"
 import type { ProductForm } from "@/lib/productModel"
 import { Loader2, X } from "lucide-react"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
+import ClientLayout from "../../clientLayout"
 
 export const dynamic = "force-dynamic"
 
@@ -95,7 +96,7 @@ export default function ProductDetailPage() {
  
   if (!mounted) return null
   return (
-    <>
+    <ClientLayout>
       {product ? (
         <div className="max-w-7xl mt-12 mx-auto px-4 md:px-6 py-8 md:py-12">
           <motion.div
@@ -393,6 +394,6 @@ export default function ProductDetailPage() {
           © 2025 Vape me. Wszelkie prawa zastrzeżone.
         </div>
       </footer>
-    </>
+    </ClientLayout>
   )
 }

@@ -5,26 +5,32 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
 
-    const data = `import mongoose from "mongoose";
-    const reservationSchema = new mongoose.Schema(
+    const data = ` const data = await ReservationsModel.aggregate([
         {
-            reservationID:{type:Number,required:true},
-            roomName:{type:String,required:true,trim:true},
-            organizer:{type:String,required:true,trim:true},
-            date:{type:String,required:true,trim:true},
-            time:{type:String,required:true,trim:true},
+            $match:{ilePracownikow:{$gt:1}}
         },
-        {
-            timestamps:{
-                createdAt:"created_at",
-                updatedAt:"updated_at"
+            {
+              $group: {
+                _id: "$time",
+                minimalnaID: { $sum: "$reservationID" },
+                ilePracownikow: { $count: {} }
+              }
             },
-            collation:'reservations'
-        }
-    )
-    const ReservationsModel = mongoose.model("reservations",reservationSchema,"reservations");
-    
-    export default ReservationsModel`
+           
+            {
+              $sort: { minimalnaID: 1 } // 1 rosnaco -1 malejaco
+              
+            },
+            {
+                $project:{
+                    _id:0, // wywietlanie 1- true 0 - false
+                    minimalnaID:1,
+                    ilePracownikow:1    
+                }
+            },{
+                $limit:2
+            }
+          ]);`
 
     const res = NextResponse.json({data});
     res.headers.set("Access-Control-Allow-Origin", "*");

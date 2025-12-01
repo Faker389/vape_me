@@ -9,6 +9,7 @@ import { auth } from "@/lib/firebase"
 import type { ProductForm } from "@/lib/productModel"
 import { useProductsStore } from "@/lib/storage"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
+import ClientLayout from "../clientLayout"
 
 const cbdOptions = ["Wszystkie", "Z CBD", "Bez CBD"]
 export const dynamic = "force-dynamic"
@@ -451,7 +452,7 @@ export default function ProductsPage() {
   if (!mounted) return null;
   
   return (
-    <>
+    <ClientLayout>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
         <div className="mb-8 md:mb-12">
           <motion.h1
@@ -565,6 +566,6 @@ export default function ProductsPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </ClientLayout>
   )
 }
