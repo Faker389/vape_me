@@ -23,7 +23,11 @@ export async function GET() {
             reservationID:{$ne:4} - wszystko oprocz
             $and:[{reservationID:{$gte:2}},{organizer:{$regex:/^J/}},{roomName:{$ne:"A"}}]
             $and:[{$or:[{reservationID:{$gte:5}},{organizer:{$regex:/^J/}}]},{roomName:{$ne:"B"}}]
-
+            $gte >=
+            $lte <=
+            $gt >
+            $lt <
+            $ne !=
 
         },
         ktore pola ma wyswietlic
