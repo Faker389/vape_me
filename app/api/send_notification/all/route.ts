@@ -31,12 +31,10 @@ if (!admin.apps.length) {
         { status: 400 }
       );
     }
-  
     try {
       const usersSnapshot = await db.collection("users").get();
-  
+     
       const sendPromises: Promise<string>[] = [];
-  
       usersSnapshot.forEach((doc) => {
         const user = doc.data();
   

@@ -13,5 +13,5 @@ export interface ProductForm {
     imageFile?:File|null
     description:string;
     features?:string[]
-    specifications?:Record<string, string>;
+    specifications?:Record<string, string>|null;
   }

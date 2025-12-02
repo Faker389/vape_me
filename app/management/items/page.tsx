@@ -133,9 +133,16 @@ export default function ItemsManagementPage() {
 
     try {
       const productRef = doc(db, "products", productId); // reference to the doc
-      await updateDoc(productRef, updatedData); // update fields
+      let data ;
+      if(updatedData.specifications&&Object.keys(updatedData.specifications).length === 1&&Object.keys(updatedData.specifications)[0]==""){
+        data={...updatedData,specifications:null}
+      }else{
+        data = {...updatedData}
+      }
+      await updateDoc(productRef, data); // update fields
       showAlert("Product updated successfully","success");
     } catch (error) {
+      console.log(error)
       showAlert("Error updating product:", "error");
     }
   }

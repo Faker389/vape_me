@@ -90,7 +90,7 @@ export default function ClientLayout({
               </a>
 
               {/* iOS Download Button */}
-              <a href="/vape me.ipa" download>
+              {/* <a href="/vape me.ipa" download>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -101,7 +101,7 @@ export default function ClientLayout({
                   </svg>
                   <span className="hidden sm:inline">iOS</span>
                 </motion.button>
-              </a>
+              </a> */}
             </div>
           </div>
         </div>

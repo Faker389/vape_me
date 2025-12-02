@@ -28,7 +28,7 @@ export default function ContactForm({ showAlert }: { showAlert: (e: string,e2:"e
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleSend}>
+    <form id="contact" className="space-y-6" onSubmit={handleSend}>
       <input
         ref={titleRef}
         placeholder="Temat"

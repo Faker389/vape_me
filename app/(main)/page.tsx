@@ -207,7 +207,7 @@ export default function Home() {
                 </motion.button>
               </a>
 
-              <a href="/vape me.ipa" download className="cursor-pointer">
+              {/* <a href="/vape me.ipa" download className="cursor-pointer">
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(236, 72, 153, 0.5)" }}
                   whileTap={{ scale: 0.95 }}
@@ -218,7 +218,7 @@ export default function Home() {
                   </svg>
                   Pobierz na iOS
                 </motion.button>
-              </a>
+              </a> */}
 
               <Link href="/products">
                 <motion.button

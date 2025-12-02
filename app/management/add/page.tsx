@@ -222,7 +222,13 @@ export default function AddProductPage() {
   async function addProduct(product: ProductForm) {
     try {
       const productRef = doc(db, "products", product.id.toString())
-      await setDoc(productRef, product)
+      let data ;
+      if(product.specifications&&Object.keys(product.specifications).length === 1&&Object.keys(product.specifications)[0]==""){
+        data={...product,specifications:null}
+      }else{
+        data = {...product}
+      }
+      await setDoc(productRef, data)
       imageRef.current?imageRef.current.value="":"";
       showAlert("Pomyślnie dodano produkt", "success")
     } catch (error) {
@@ -233,8 +239,13 @@ export default function AddProductPage() {
   async function updateProduct(productId: number, updatedData: Partial<ProductForm>) {
     try {
       const productRef = doc(db, "products", productId.toString())
-  
-      await updateDoc(productRef, updatedData)
+      let data ;
+      if(updatedData.specifications&&Object.keys(updatedData.specifications).length === 1&&Object.keys(updatedData.specifications)[0]==""){
+        data={...updatedData,specifications:null}
+      }else{
+        data = {...updatedData}
+      }
+      await updateDoc(productRef, data)
       imageRef.current?imageRef.current.value="":"";
       showAlert("Pomyślnie zmodyfikowano produkt","success")
     } catch (error) {
