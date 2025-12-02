@@ -1,8 +1,7 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react"
+import { useEffect, useState, useMemo, useCallback, useRef, memo } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Filter } from 'lucide-react'
 import { auth } from "@/lib/firebase"
@@ -10,63 +9,12 @@ import type { ProductForm } from "@/lib/productModel"
 import { useProductsStore } from "@/lib/storage"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 import ClientLayout from "../clientLayout"
+import OptimizedImage from "@/components/OptimizedImage"
 
-const cbdOptions = ["Wszystkie", "Z CBD", "Bez CBD"]
+const cbdOptions = ["Wszystkie", "Z CBD", "Bez CBD"] as const
 export const dynamic = "force-dynamic"
 
-// Image loading optimization component
-const OptimizedProductImage = ({ src, alt, priority = false }: { src: string; alt: string; priority?: boolean }) => {
-  const [imageSrc, setImageSrc] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    if (!src) {
-      setImageSrc("/placeholder.svg")
-      setIsLoading(false)
-      return
-    }
-
-    // Use requestIdleCallback for non-priority images
-    const loadImage = () => {
-      setImageSrc(src)
-    }
-
-    if (priority) {
-      loadImage()
-    } else {
-      if ("requestIdleCallback" in window) {
-        requestIdleCallback(loadImage, { timeout: 2000 })
-      } else {
-        setTimeout(loadImage, 100)
-      }
-    }
-  }, [src, priority])
-
-  return (
-    <div className="relative w-full h-full">
-      {isLoading && (
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-pink-900/20 animate-pulse" />
-      )}
-      {imageSrc && (
-        <Image
-          src={imageSrc}
-          height={256}
-          width={256}
-          className="object-cover rounded-lg"
-          alt={alt}
-          loading={priority ? "eager" : "lazy"}
-          quality={75}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          onLoadingComplete={() => setIsLoading(false)}
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect fill='%23391f5c' width='256' height='256'/%3E%3C/svg%3E"
-        />
-      )}
-    </div>
-  )
-}
-
-const ProductCard = ({ 
+const ProductCard = memo(({ 
   product, 
   showWorkerOptions, 
   getLocationText,
@@ -88,10 +36,12 @@ const ProductCard = ({
   >
     <div className="h-48 md:h-64 bg-gradient-to-br from-purple-900/30 to-pink-900/30 relative overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center">
-        <OptimizedProductImage 
+        <OptimizedImage 
           src={product.image || "/placeholder.svg"} 
           alt={product.name}
           priority={priority}
+          width={256}
+          height={256}
         />
       </div>
 
@@ -152,7 +102,9 @@ const ProductCard = ({
       )}
     </div>
   </motion.div>
-)
+))
+
+ProductCard.displayName = "ProductCard"
 
 export default function ProductsPage() {
   const [mounted, setMounted] = useState(false);
@@ -206,6 +158,7 @@ export default function ProductsPage() {
     }
   }, [products, getBrands, getCategories])
 
+  // Debounce search query to reduce filtering operations
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery)

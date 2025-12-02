@@ -8,7 +8,7 @@ export const metadata = {
     title: 'Vape me - Program lojalnościowy',
     description: 'Zdobywaj nagrody robiąc zakupy w programie lojalnościowym Vape Me',
     type: 'website',
-    url: 'https://vape-me-nu.vercel.app',
+    url: 'https://www.vapeme.com.pl/',
     siteName: 'Vape Me',
   },
   twitter: {
@@ -41,7 +41,6 @@ export default function SpecialLayout({ children }: { children: React.ReactNode 
         <meta name="mobile-web-app-capable" content="yes" />
         
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="manifest" href="/manifest.json" />
         
         <meta name="user-scalable" content="no" />
       </head>

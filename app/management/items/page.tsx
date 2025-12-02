@@ -3,7 +3,7 @@
 import { useState,useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import Image from "next/image"
+import OptimizedImage from "@/components/OptimizedImage"
 import { ArrowLeft, Edit, X, Save, Upload, Plus, AlertCircle } from "lucide-react"
 import { auth, db, getCurrentUser, storage } from "@/lib/firebase"
 import {  doc, updateDoc } from "firebase/firestore"
@@ -320,12 +320,13 @@ export default function ItemsManagementPage() {
                   className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-xl border border-white/10 rounded-xl p-4 flex items-center gap-4 hover:border-purple-500/50 transition-all"
                 >
                   <div className="w-20 h-20 rounded-lg bg-gray-800/50 flex items-center justify-center overflow-hidden flex-shrink-0">
-                    <Image
+                    <OptimizedImage
                       src={product.image || "/placeholder.svg"}
                       alt={product.name}
                       width={80}
                       height={80}
                       className="object-cover"
+                      priority={index < 10}
                     />
                   </div>
 

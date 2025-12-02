@@ -186,7 +186,7 @@ export default function AddProductPage() {
       const product = products.find(e => e.id === id)
       if (!product) {
         isNew.current = true
-        setFormData({...initialForm,id})
+        setFormData({...formData,id})
         return;
       }
       const obj= {
@@ -259,6 +259,7 @@ export default function AddProductPage() {
     let fileBlob: Blob | null = null;
     if (formData.imageFile) {
       fileBlob = formData.imageFile;
+      console.log(fileBlob)
     } else if (formData.image && formData.image.trim() !== "") {
       const idToken = await getCurrentUser();
       try {
@@ -269,6 +270,7 @@ export default function AddProductPage() {
         });
         if (!res.ok) throw new Error("Image download failed");
         fileBlob = await res.blob();
+        console.log(fileBlob)
       } catch (e) {
         showAlert("Błąd pobierania zdjęcia", "error");
       }
@@ -308,6 +310,7 @@ export default function AddProductPage() {
     } else {
       imageUrl = "";
     }
+    console.log(imageUrl)
     return imageUrl
   }
   const handleSubmit = async (e: React.FormEvent) => {
@@ -354,6 +357,7 @@ export default function AddProductPage() {
         setFocused(false);
       }
     }
+   
     document.addEventListener("mousedown", (e)=>{
       setTimeout(() => {
         handleClickOutside(e)  
@@ -362,6 +366,7 @@ export default function AddProductPage() {
     return () => document.removeEventListener("mousedown", (e)=>{
       setTimeout(() => {
         handleClickOutside(e)  
+
       }, 1000);
       });
   }, []);
@@ -570,6 +575,7 @@ export default function AddProductPage() {
                   placeholder="Np. ELFBAR"
                 />
               </div>
+             
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">

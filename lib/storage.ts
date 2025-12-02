@@ -22,14 +22,14 @@ export const useProductsStore = create<ProductStore>((set, get) => ({
 
     const unsub = onSnapshot(collection(db, "products"), (snapshot) => {
       const data = snapshot.docs.map((doc) => doc.data() as ProductForm)
-      set({ rawproducts: data, isLoaded: true })
-    
+      
+      // Process data once and set both in a single update to prevent double re-renders
       const tempData = data.map((e) => ({
         ...e,
         name: e.name.replace(/&/g, "")
       }))
     
-      set({ products: tempData, isLoaded: true })
+      set({ rawproducts: data, products: tempData, isLoaded: true })
     })
     
 

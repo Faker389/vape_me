@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import OptimizedImage from "@/components/OptimizedImage"
 import { AnimatePresence, motion } from "framer-motion"
 import { useParams, useRouter } from "next/navigation"
 import { useProductsStore } from "@/lib/storage"
@@ -20,14 +20,12 @@ const RelatedProductCard = ({ product }: { product: ProductForm }) => (
       className="glass-effect rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-white/10"
     >
       <div className="h-40 md:h-48 bg-gradient-to-br from-purple-900/30 to-pink-900/30 flex items-center justify-center p-4">
-        <Image
+        <OptimizedImage
           src={product.image || "/placeholder.svg"}
           alt={product.name}
           width={192}
           height={192}
           className="h-full w-auto object-contain"
-          loading="lazy"
-          quality={75}
         />
       </div>
       <div className="p-3 md:p-4">
@@ -125,14 +123,13 @@ export default function ProductDetailPage() {
                     animate={{ scale: 1, opacity: 1 }}
                     className="h-full flex items-center justify-center"
                   >
-                    <Image
+                    <OptimizedImage
                       src={product.image || "/placeholder.svg"}
                       className="h-full w-auto object-contain"
                       alt={product.name}
                       width={384}
                       height={384}
-                      priority
-                      quality={85}
+                      priority={true}
                     />
                   </motion.div>
 
