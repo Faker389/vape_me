@@ -165,3 +165,34 @@ body {
 .glow-effect {
   box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), 0 0 60px rgba(236, 72, 153, 0.2);
 }
+/* Global scrollbar styles for modern browsers */
+* {
+  scrollbar-width: thin;          /* For Firefox */
+  scrollbar-color: #a259ff #2b1e3f; /* thumb and track for Firefox */
+}
+
+/* Chrome, Edge, Safari */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #2b1e3f; /* dark purple background */
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff41a1, #a259ff); /* pink to purple gradient */
+  border-radius: 10px;
+  border: 2px solid #2b1e3f; /* adds spacing around thumb */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff6cc9, #c18aff); /* lighter gradient on hover */
+}
+
+/* Optional: scrollbar corner */
+*::-webkit-scrollbar-corner {
+  background: #2b1e3f;
+}

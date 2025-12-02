@@ -25,7 +25,7 @@ const RelatedProductCard = ({ product }: { product: ProductForm }) => (
           alt={product.name}
           width={192}
           height={192}
-          className="h-full w-auto object-contain"
+          className="h-full w-auto  object-contain"
         />
       </div>
       <div className="p-3 md:p-4">
@@ -176,10 +176,9 @@ export default function ProductDetailPage() {
                         onClick={() => handleThumbnailClick(e.id.toString())}
                         className="relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden cursor-pointer glass-effect border-2 border-transparent hover:border-purple-500 transition-all"
                       >
-                        <Image
+                        <OptimizedImage
                           src={e.image || "/placeholder.svg"}
                           alt={`${product.name}`}
-                          fill
                           className="object-cover"
                           sizes="80px"
                         />
@@ -197,10 +196,9 @@ export default function ProductDetailPage() {
                         className="glass-effect rounded-2xl p-4 border border-purple-500/30"
                       >
                         <div className="relative  h-48 md:h-64 rounded-xl overflow-hidden mb-3">
-                          <Image
+                          <OptimizedImage
                             src={hoveredImage || "/placeholder.svg"}
                             alt="Preview"
-                            fill
                             className="object-contain"
                             sizes="(max-width: 768px) 100vw, 50vw"
                           />

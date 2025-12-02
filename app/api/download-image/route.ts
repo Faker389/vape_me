@@ -85,8 +85,8 @@ export async function POST(request: Request) {
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
-  } catch (err: any) {
-    console.error("Image download error:", err.message);
+  } catch (err) {
+    console.error("Image download error:", err);
     return NextResponse.json({ error: "Failed to download image" }, { status: 500 });
   }
 }
