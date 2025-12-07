@@ -1,0 +1,99 @@
+/* Global */
+body {
+    font-family: 'Calibri', sans-serif;
+    line-height: 1.6;
+    margin: 40px;
+    background: radial-gradient(circle at top, #1a1a2e, #0f0f17);
+    color: #e5e5e5;
+}
+
+/* Gradient text function */
+.gradient-text {
+    background: linear-gradient(90deg, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Titles / Headings */
+h1 {
+    font-size: 24pt;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #ffffff;
+    border-bottom: 3px solid rgba(168, 85, 247, 0.6);
+    padding-bottom: 10px;
+}
+
+h2 {
+    font-weight: bold;
+    margin-top: 25px;
+    margin-bottom: 12px;
+    color: #d0c8ff;
+}
+
+h3 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #c4b5fd;
+}
+
+h4 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    color: #a78bfa;
+}
+
+/* Paragraphs and lists */
+p {
+    margin-bottom: 10px;
+    font-size: 11pt;
+    color: #e0e0e0;
+}
+
+ul, ol {
+    margin-left: 25px;
+    margin-bottom: 15px;
+}
+
+li {
+    margin-bottom: 8px;
+    font-size: 11pt;
+    color: #d4d4d4;
+}
+
+/* Bold */
+strong {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Title sections */
+.title {
+    text-align: center;
+    font-size: 28pt;
+    font-weight: bold;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #a855f7, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+*{
+    font-size: 1.4rem;
+}
+h2,h3{
+    font-size: 2rem;
+}
+li{
+    font-size: 1.4rem;
+}
+.subtitle {
+    text-align: center;
+    font-size: 16pt;
+    margin-bottom: 30px;
+    color: #c4c4c4;
+}

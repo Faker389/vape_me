@@ -1,4 +1,3 @@
-import "./globals.css";
 export const metadata = {
   title: 'Vape me',
   description: 'Zdobywaj nagrody robiąc zakupy w programie lojalnościowym Vape Me. Ekskluzywne kupony, zniżki i nagrody za każdy zakup!',
@@ -44,7 +43,7 @@ export default function SpecialLayout({ children }: { children: React.ReactNode 
         
         <meta name="user-scalable" content="no" />
       </head>
-      <body className="font-sans antialiased  ">
+      <body className="font-sans antialiased ">
         {children}
       </body>
     </html>
