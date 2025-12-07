@@ -424,6 +424,7 @@ export default function Przeglad(){
 <li><strong>Wsparcie techniczne</strong> - darmowe przez 2 lata</li>
 <li><strong>Wszelakie dodatki</strong> - cena do dogadania</li>
 <li><strong>Utrzymanie bazy danych</strong> - maksymalnie 30 zł miesięcznie</li>
+<li><strong>Aplikacja na IPhone</strong> - tak jak mówiłem aplikacja jest gotowa ale licencja od apple kosztuje 100$ rocznie</li>
 <li><strong>Cena końcowa</strong> - 7.200 zł</li>
 </ul>
 </div>
