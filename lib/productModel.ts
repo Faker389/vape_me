@@ -12,6 +12,6 @@ export interface ProductForm {
     store2quantity:number
     imageFile?:File|null
     description:string;
-    features?:string[]
+    features?:string[]|null
     specifications?:Record<string, string>|null;
   }

@@ -59,8 +59,8 @@ const initialForm: ProductForm = {
   description: "",
   imageFile: undefined,
   image: "",
-  features: [],
-  specifications: {},
+  features: null,
+  specifications: null,
 }
 
 export default function AddProductPage() {
@@ -75,7 +75,7 @@ export default function AddProductPage() {
   const [location, setLocation] = useState<"location1" | "location2">("location1")
   const isNew = useRef<boolean>(true)
   const [features, setFeatures] = useState<string[]>([])
-  const [specifications, setSpecifications] = useState<Record<string, string>>({})
+  const [specifications, setSpecifications] = useState<Record<string, string>|null>(null)
   const [newFeature, setNewFeature] = useState("")
   const [newSpecKey, setNewSpecKey] = useState("")
   const [newSpecValue, setNewSpecValue] = useState("")
@@ -138,7 +138,6 @@ export default function AddProductPage() {
     setFeatures(updatedFeatures)
     setFormData({ ...formData, features: updatedFeatures })
   }
-
   const addSpecification = () => {
     if (newSpecKey.trim() && newSpecValue.trim()) {
       const updatedSpecs = { ...specifications, [newSpecKey.trim()]: newSpecValue.trim() }
@@ -223,7 +222,7 @@ export default function AddProductPage() {
     try {
       const productRef = doc(db, "products", product.id.toString())
       let data ;
-      if(product.specifications&&Object.keys(product.specifications).length === 1&&Object.keys(product.specifications)[0]==""){
+      if(product.specifications ){
         data={...product,specifications:null}
       }else{
         data = {...product}
@@ -240,11 +239,7 @@ export default function AddProductPage() {
     try {
       const productRef = doc(db, "products", productId.toString())
       let data ;
-      if(updatedData.specifications&&Object.keys(updatedData.specifications).length === 1&&Object.keys(updatedData.specifications)[0]==""){
-        data={...updatedData,specifications:null}
-      }else{
-        data = {...updatedData}
-      }
+      data={...updatedData,specifications:specifications,features:features}
       await updateDoc(productRef, data)
       imageRef.current?imageRef.current.value="":"";
       showAlert("Pomyślnie zmodyfikowano produkt","success")
@@ -338,7 +333,6 @@ export default function AddProductPage() {
       setRemoveBG(false);
       setFeatures([]);
       setSpecifications({});
-      showAlert("Pomyślnie dodano produkt","success")
     } catch (error) {
       showAlert("Błąd dodawania produktu", "error");
     }
@@ -735,7 +729,7 @@ export default function AddProductPage() {
                 />
               </div>
 
-              {Object.keys(specifications).length > 0 && (
+              {specifications&&Object.keys(specifications).length > 0 && (
                 <div className="space-y-2">
                   {Object.entries(specifications).map(([key, value]) => (
                     <motion.div
