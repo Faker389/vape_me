@@ -30,7 +30,7 @@ export interface TransactionModel {
     minimalPrice: number;
     pointsCost: number;
     rewardID: string;
-    discountamount?: number
+    discountAmount?: number
     title: string;
     usedDate: string | null;   // 
   }

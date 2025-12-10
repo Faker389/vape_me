@@ -26,6 +26,17 @@ import { coupon, db } from "@/lib/firebase"
     imageUrl: "",
   }
 
+  function generateUID(length = 10) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let uid = '';
+  
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * chars.length);
+      uid += chars[randomIndex];
+    }
+  
+    return uid;
+  }
 export default function DiscountForm({fkc}:{fkc:(e: string,e2:"error" | "success" | "warning")=> void}){
     const [discountForm, setDiscountForm] = useState<formCoupon>(initialform)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -46,7 +57,7 @@ export default function DiscountForm({fkc}:{fkc:(e: string,e2:"error" | "success
         const expiryDate = new Date()
         expiryDate.setDate(expiryDate.getDate() + Number(discountForm.expiryDays))
         const couponData: coupon = {
-          id: crypto.randomUUID(),
+          id: generateUID() ,
           name: discountForm.title,
           description: discountForm.description,
           imageUrl: discountForm.imageUrl,

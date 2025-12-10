@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import OptimizedImage from "@/components/OptimizedImage"
 import { ArrowLeft, Edit, X, Save, Upload, Plus, AlertCircle } from "lucide-react"
 import { auth, db, getCurrentUser, storage } from "@/lib/firebase"
 import { doc, updateDoc } from "firebase/firestore"
@@ -230,7 +229,7 @@ export default function EditForm({handleCloseFkc,showAlert,product}:params){
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Zdjęcie produktu</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Zdjęcie produktu *( aby usunąć tło z już zapisanego zdjęcia musisz podać nowy link do zdjęcia)</label>
             <div className="flex flex-row gap-8">
               <div className="w-44 h-32 rounded-lg bg-gray-800/50 border border-white/10 flex items-center justify-center overflow-hidden">
                 {formData.image ? (

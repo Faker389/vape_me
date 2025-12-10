@@ -29,7 +29,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
     imageUrl: string
     minimalPrice?: number
     isDiscount: boolean
-    discountamount?: number
+    discountAmount?: number
   }
   export const dynamic = 'force-dynamic'
 
@@ -40,7 +40,6 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
   }
   export default function TransactionPage() {
     const [mounted, setMounted] = useState(false);
-    const [codeVal,setCodeVal]=useState<string>("")
     useEffect(() => {
       setMounted(true);
     }, []);
@@ -108,7 +107,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
               imageUrl: coupon.imageUrl ?? "",
               minimalPrice: coupon.minimalPrice,
               isDiscount: coupon.isDiscount ?? false,
-              discountamount: coupon.discountamount ?? 0,
+              discountAmount: coupon.discountAmount ?? 0,
             }])
           } else {
             showAlert("Podany użytkownik nie posiada danego kuponu","warning")
@@ -161,12 +160,12 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
     
     // Calculate coupon discount
     const couponDiscount = scannedCoupons.reduce((sum, coupon) => {
-      if (coupon.isDiscount && coupon.discountamount) {
+      if (coupon.isDiscount && coupon.discountAmount) {
         // If it's a percentage discount
-        return sum + (totalPrice * (coupon.discountamount / 100))
-      } else if (!coupon.isDiscount && coupon.discountamount) {
+        return sum + (totalPrice * (coupon.discountAmount / 100))
+      } else if (!coupon.isDiscount && coupon.discountAmount) {
         // If it's a fixed amount discount
-        return sum + coupon.discountamount
+        return sum + coupon.discountAmount
       }
       return sum
     }, 0)
@@ -594,8 +593,8 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
                     <div className="flex items-center gap-3">
                       <div className="text-pink-400 font-bold text-lg">
                         {coupon.isDiscount 
-                          ? `-${coupon.discountamount}%` 
-                          : `-${coupon.discountamount} zł`}
+                          ? `-${coupon.discountAmount}%` 
+                          : `-${coupon.discountAmount} zł`}
                       </div>
                       <button
                         onClick={removeCoupon}

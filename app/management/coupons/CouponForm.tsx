@@ -8,7 +8,18 @@ import type { ProductForm } from "@/lib/productModel"
 import { doc, setDoc } from "firebase/firestore"
 import { type coupon, db } from "@/lib/firebase"
 import { useProductsStore } from "@/lib/storage"
+import OptimizedImage from "./anotherOptimizedImage"
+function generateUID(length = 10) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let uid = '';
 
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    uid += chars[randomIndex];
+  }
+
+  return uid;
+}
 interface formCoupon {
   title: string
   category: string
@@ -47,7 +58,6 @@ const selectedForm = {
 }
 
 export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "success" | "warning") => void }) {
-  const [discountForm, setDiscountForm] = useState<formCoupon>(initialform)
   const [selectedProduct, setSelectedProduct] = useState<ProductForm>(selectedForm)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [itemForm, setItemForm] = useState({ productId: 0, pointCost: 0, expiryDays: 0 })
@@ -97,7 +107,7 @@ export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "succ
     const expiryDate = new Date()
     expiryDate.setDate(expiryDate.getDate() + itemForm.expiryDays)
     const couponData: coupon = {
-      id: crypto.randomUUID(),
+      id:generateUID() ,
       name: selectedProduct.name,
       description: `Zeskanuj kod przy kasie aby odebrać darmowy ${selectedProduct.name}. Kupon ważny do ${expiryDate.toLocaleDateString()}`,
       imageUrl: selectedProduct.image,
@@ -153,10 +163,9 @@ export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "succ
                   : "bg-white/5 border-white/10 hover:bg-white/10"
               }`}
             >
-              <img
+              <OptimizedImage
                 src={product.image || "/placeholder.svg"}
                 alt={product.name}
-                className="w-full h-24 md:h-32 object-cover rounded-lg mb-2 md:mb-3"
               />
               <h4 className="text-white font-bold mb-1 text-sm md:text-base line-clamp-2">{product.name}</h4>
               <p className="text-white/60 text-xs mb-1 md:mb-2 truncate">{product.category}</p>
