@@ -267,25 +267,18 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
     };
     
     const sentNotification = async()=>{
+      if(totalPoints==0) return true;
       if (userScanned == null){ 
         showAlert("Użytkownik niezeskanowany", "error")  
         return false;
       }      
-      const docRefUser = doc(db, "users", userScanned);
-      const docSnapUser = await getDoc(docRefUser);
-      if (!docSnapUser.exists()){ 
-        showAlert("Użytkownik nie istnieje", "error")  
-        return false;
-      }
       try {
-        const data = docSnapUser.data();
-          const fcmToken = data.token ?? "";
           const idToken = await getCurrentUser();
           await axios.post("/api/send_notification", {
             title: "Otrzymujesz nowe buszki!",
             body: `Za twój ostatni zakup przyznaliśmy ci ${totalPoints} buszków!`,
             priority: "high",
-            fcmToken,
+            userID:userScanned,
             notificationType: "pointsActivity",
           },{
             headers: {
@@ -295,7 +288,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
           return true;
       } catch (error) {
         console.log(error)
-          showAlert("Wystąpił błąd podczas wysyłania powiadomienia", "error")
+          showAlert("Nie udało sie wysłać, użytkownik ma wyłączone powiadomienia.", "warning")
           return false;
       }
     }

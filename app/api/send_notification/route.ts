@@ -42,7 +42,6 @@ export async function POST(req: NextRequest) {
     notification: { title, body },
     android: { priority: priority === "high" ? "high" : "normal" },
   };
-
   try {
     const response = await admin.messaging().send(message);
     return NextResponse.json({ success: true, response });
