@@ -12,7 +12,7 @@ export default function ManagementPage() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vapeme123321@gmail.com") {
+      if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vape.me_rzeszow@op.pl") {
         window.location.href = "/"
       }
     })

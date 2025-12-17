@@ -8,7 +8,7 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { auth } from "@/lib/firebase"
 import { Settings, Download } from "lucide-react"
-
+ 
 export default function ClientLayout({
   children,
 }: Readonly<{
@@ -17,7 +17,7 @@ export default function ClientLayout({
   const [showWorkerOptions, setShowWorkerOptions] = useState<boolean>(false)
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user?.email === "malgorzatamagryso2.pl@gmail.com" || user?.email === "vapeme123321@gmail.com") {
+      if (user?.email === "malgorzatamagryso2.pl@gmail.com" || user?.email === "vape.me_rzeszow@op.pl") {
         setShowWorkerOptions(true)
       } else {
         setShowWorkerOptions(false)

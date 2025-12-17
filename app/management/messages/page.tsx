@@ -6,7 +6,7 @@ import { ArrowLeft, Search, ChevronDown, ChevronUp, Mail, MailOpen, Calendar, Tr
 import Link from "next/link"
 import { MessageForm, useMessageForm } from "@/lib/storage"
 import {  Timestamp, updateDoc, collection, query, where, getDocs } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { auth, db } from "@/lib/firebase"
 
 interface Alert {
     id: string
@@ -44,6 +44,14 @@ export default function MessagesPage() {
     } catch(err){
     }
   }
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vape.me_rzeszow@op.pl") {
+        window.location.href = "/"
+      }
+    })
+    return () => unsubscribe()
+  }, [])
   useEffect(() => {
     listenToProducts()
   }, [listenToProducts])
