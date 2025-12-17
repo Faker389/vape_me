@@ -79,7 +79,7 @@ export default function AddProductPage() {
   const [newFeature, setNewFeature] = useState("")
   const [newSpecKey, setNewSpecKey] = useState("")
   const [newSpecValue, setNewSpecValue] = useState("")
-  const { products, listenToProducts } = useProductsStore()
+  const { rawproducts, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus();
   const [focused, setFocused] = useState(false);
   const [brandFocused, setBrandFocused] = useState(false)
@@ -100,7 +100,7 @@ export default function AddProductPage() {
       setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
     }, 3000)
   }
-  const brands = products
+  const brands = rawproducts
   .reduce((prev: string[], item: productTemp) => {
     if (item.brand && !prev.includes(item.brand)) {
       prev.push(item.brand)
@@ -111,7 +111,7 @@ export default function AddProductPage() {
     brand.toLowerCase().includes(formData.brand.toLowerCase())
   )
 
-  const categories = products.reduce((prev:string[],item:productTemp)=>{
+  const categories = rawproducts.reduce((prev:string[],item:productTemp)=>{
     if(!prev.includes(item.category)){
       prev.push(item.category)
     }
@@ -211,7 +211,7 @@ export default function AddProductPage() {
 
   async function checkIfExists(id: number){
     try {
-      const product = products.find(e => e.id === id)
+      const product = rawproducts.find(e => e.id === id)
       if (!product) {
         isNew.current = true
         setFormData({...formData,id})

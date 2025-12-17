@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { auth } from "@/lib/firebase"
 import { useEffect } from "react"
-import { Package, PlusCircle, Receipt, Bell, Gift, MessageSquare } from "lucide-react"
+import { Package, PlusCircle, Receipt, Bell, Gift, MessageSquare, ArrowLeft } from "lucide-react"
 import { OfflineBanner } from "@/components/offline-banner"
 export const dynamic = 'force-dynamic'
 
@@ -109,8 +109,11 @@ export default function ManagementPage() {
 
       <div className="relative z-10 container mx-auto px-4 py-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
+          <Link href="/" ><p className="text-xl font-bold flex justify-center mt-2 gap-2 items-center text-purple-200"> 
+          <ArrowLeft className="w-5 h-5" />
+            Powrót do ekranu głównego</p></Link>
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Panel Zarządzania</h1>
-          <p className="text-xl text-purple-200">Zarządzaj produktami, transakcjami i użytkownikami</p>
+          <p className="text-xl text-purple-200 ">Zarządzaj produktami, transakcjami i użytkownikami</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">

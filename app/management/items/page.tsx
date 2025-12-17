@@ -40,7 +40,7 @@ export default function ItemsManagementPage() {
   const [mounted, setMounted] = useState(false)
   const [editingProduct, setEditingProduct] = useState<ProductForm | null>(null)
   const [formData, setFormData] = useState<ProductForm | null>(null)
-  const { products, listenToProducts } = useProductsStore()
+  const { rawproducts, listenToProducts } = useProductsStore()
   const [searchQuery, setSearchQuery] = useState<string>("")
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
   const [alerts, setAlerts] = useState<Alert[]>([])
@@ -83,17 +83,17 @@ export default function ItemsManagementPage() {
   }, [])
 
   const filteredProducts = useMemo(() => {
-    if (!products) return []
+    if (!rawproducts) return []
 
     const query = debouncedSearchQuery.toLowerCase().trim()
-    if (!query) return products.slice(0, 50)
+    if (!query) return rawproducts.slice(0, 50)
 
-    return products
+    return rawproducts
       .filter((e) => {
         return e.id.toString().includes(query) || e.name.toLowerCase().includes(query)
       })
       .slice(0, 50)
-  }, [products, debouncedSearchQuery])
+  }, [rawproducts, debouncedSearchQuery])
 
   useEffect(() => {
     listenToProducts()
@@ -187,7 +187,7 @@ export default function ItemsManagementPage() {
           <div className="flex-1">
             <div className="space-y-4">
               {isOnline &&
-                products &&
+                rawproducts &&
                 filteredProducts.map((product, index) => (
                   <motion.div
                     key={product.id}
