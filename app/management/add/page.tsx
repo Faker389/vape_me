@@ -50,7 +50,7 @@ const initialForm: ProductForm = {
   name: "",
   category: "",
   brand: "",
-  price: 0,
+  price: 0, 
   isNew: false,
   isBestseller: false,
   hasCBD: false,
@@ -82,6 +82,8 @@ export default function AddProductPage() {
   const { products, listenToProducts } = useProductsStore()
   const isOnline = useOnlineStatus();
   const [focused, setFocused] = useState(false);
+  const [brandFocused, setBrandFocused] = useState(false)
+  const brandInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
   const [alerts, setAlerts] = useState<Alert[]>([])
@@ -98,6 +100,17 @@ export default function AddProductPage() {
       setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id))
     }, 3000)
   }
+  const brands = products
+  .reduce((prev: string[], item: productTemp) => {
+    if (item.brand && !prev.includes(item.brand)) {
+      prev.push(item.brand)
+    }
+    return prev
+  }, [])
+  .filter(brand =>
+    brand.toLowerCase().includes(formData.brand.toLowerCase())
+  )
+
   const categories = products.reduce((prev:string[],item:productTemp)=>{
     if(!prev.includes(item.category)){
       prev.push(item.category)
@@ -117,6 +130,22 @@ export default function AddProductPage() {
         return 'bg-red-600 border-red-400'
     }
   }
+  function handleClickOutside(event: MouseEvent) {
+    if (
+      inputRef.current &&
+      !inputRef.current.contains(event.target as Node)
+    ) {
+      setFocused(false)
+    }
+  
+    if (
+      brandInputRef.current &&
+      !brandInputRef.current.contains(event.target as Node)
+    ) {
+      setBrandFocused(false)
+    }
+  }
+  
   useEffect(() => {
     listenToProducts()
   }, [listenToProducts])
@@ -558,17 +587,51 @@ export default function AddProductPage() {
               )}
             </AnimatePresence>
           </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Marka *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.brand}
-                  onChange={(e) => handleInputChange("brand", e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
-                  placeholder="Np. ELFBAR"
-                />
-              </div>
+          <div className="relative w-full max-w-sm">
+  <label className="block text-sm font-medium text-gray-400 mb-2">
+    Marka *
+  </label>
+
+  <input
+    type="text"
+    required
+    ref={brandInputRef}
+    value={formData.brand}
+    onFocus={() => setBrandFocused(true)}
+    onChange={(e) => handleInputChange("brand", e.target.value)}
+    className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+    placeholder="Np. ELFBAR"
+  />
+
+  {/* Brand Suggestions */}
+  <AnimatePresence>
+    {brandFocused && brands.length > 0 && (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="absolute top-full w-full bg-gray-900/80 backdrop-blur-xl rounded-xl border border-white/10 max-h-64 overflow-y-auto z-50 shadow-lg"
+      >
+        {brands.map((item, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.03 }}
+            onClick={() => {
+              handleInputChange("brand", item)
+              setBrandFocused(false)
+            }}
+            className="bg-gray-800/50 cursor-pointer px-4 py-3 text-white hover:bg-purple-600/20 border-b border-white/10 last:border-b-0 transition-all"
+          >
+            {item}
+          </motion.div>
+        ))}
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
+
              
             </div>
 

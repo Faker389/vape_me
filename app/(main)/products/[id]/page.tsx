@@ -91,6 +91,17 @@ export default function ProductDetailPage() {
   const handleThumbnailClick = (id: string) => {
     router.push(`/products/${id}`)
   }
+  const checkIfPossbileCategories = (product: ProductForm)=>{
+    product.category=="Liquidy"
+    switch (product.category) {
+      case "Liquidy": return true ; break;
+      case "Snusy": return true ; break;
+      case "Longfill": return true ; break;
+      default:
+        return false;
+        break;
+    }
+  }
  
   if (!mounted) return null
   return (
@@ -163,10 +174,9 @@ export default function ProductDetailPage() {
                   <span className="text-xs md:text-sm text-gray-400">{product!.brand}</span>
                 </div>
                 <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-4">{product!.name}</h1>
-
                 <div className="mb-6">
                   <div className="flex gap-3 flex-wrap mb-4">
-                    {product.category=="Liquidy"&&products.filter((e)=>e.brand===product!.brand).map((e: ProductForm, idx: number) => (
+                    {checkIfPossbileCategories(product)&&products.filter((e)=>e.brand===product!.brand).map((e: ProductForm, idx: number) => (
                       <motion.div
                         key={idx}
                         whileHover={{ scale: 1.05 }}
