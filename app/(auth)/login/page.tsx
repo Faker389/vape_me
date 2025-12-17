@@ -1,81 +1,89 @@
 "use client"
 
-import Image from "next/image"
-import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Eye, EyeOff } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { auth, provider } from "@/lib/firebase"
-import { signInWithPopup, signOut } from "firebase/auth"
-import { Button } from "@/components/ui/button"
+import { Button } from "../../../components/ui/button"
+import { Input } from "../../../components/ui/input"
+import { Label } from "../../../components/ui/label"
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth"
+import { auth } from "@/lib/firebase"
 
-export default function LoginForm() {
-  const searchParams = useSearchParams()
-  const error = searchParams.get("error")
+export default function AuthForm() {
+  const [isLogin, setIsLogin] = useState(true)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isReady, setIsReady] = useState(false)
-
-  useEffect(() => {
-    setIsReady(true)
-  }, [])
-
-  const logOut = async () => {
-    if (!auth) return
+  const loginFKC = async () => {
     try {
-      await signOut(auth)
-    } catch (error) {
-      console.error("Sign-out Error:", error)
-    }
-  }
-
-  const signInWithGoogle = async () => {
-    if (!auth || !provider) {
-      setErrorMessage("Firebase is not initialized. Please check your configuration.")
-      return
-    }
-    try {
-      const result = await signInWithPopup(auth, provider)
-      const user = result.user
-      if (!user) {
-        setErrorMessage("Błąd podczas logowania spróbuj ponownie później")
-        return
-      }
-      if (user.email!.trim() !== "malgorzatamagryso2.pl@gmail.com"&&user.email?.trim()!=="vapeme123321@gmail.com") {
-        logOut()
-      }
+      await signInWithEmailAndPassword(
+        auth,
+        email.replace(/\s+/g, "").trim(),
+        password.replace(/\s+/g, "").trim()
+      );
       window.location.href = "/"
-      return
     } catch (error) {
-      console.error("Google Sign-in Error:", error)
-      throw error
+      console.log(error)
+    }
+  }
+  const registerFKC = async () => {
+    try {
+      await createUserWithEmailAndPassword(
+        auth,
+        email.replace(/\s+/g, "").trim(),
+        password.replace(/\s+/g, "").trim()
+      );
+      setIsLogin(true)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const handleSubmit = () => {
+    setErrorMessage(null)
+
+    if (!email || !password) {
+      setErrorMessage("Wszystkie pola są wymagane")
+      return
+    }
+
+    if (!isLogin && password !== confirmPassword) {
+      setErrorMessage("Hasła nie są identyczne")
+      return
+    }
+
+    // Your authentication logic here
+    if(isLogin){
+      loginFKC();
+    }else{
+      registerFKC();
     }
   }
 
-  useEffect(() => {
-    if (error) {
-      switch (error) {
-        case "auth_failed":
-          setErrorMessage("Authentication failed. Please try again.")
-          break
-        case "no_code":
-          setErrorMessage("No authorization code received from Google.")
-          break
-        default:
-          setErrorMessage(`Error: ${error}`)
-      }
-    }
-  }, [error])
+  const resetForm = () => {
+    setEmail("")
+    setPassword("")
+    setConfirmPassword("")
+    setErrorMessage(null)
+    setShowPassword(false)
+    setShowConfirmPassword(false)
+  }
 
-  if (!isReady) {
-    return null
+  const toggleMode = () => {
+    setIsLogin(!isLogin)
+    resetForm()
   }
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0a0a0f]">
       {/* Logo in top left */}
       <div className="absolute top-6 left-6 z-20">
-        <Image src="/logo.png" alt="Company Logo" width={220} height={140} className="h-24 w-auto cursor-pointer" />
+        <div className="h-24 w-auto cursor-pointer text-white text-2xl font-bold">
+          LOGO
+        </div>
       </div>
 
       {/* Background floating orbs */}
@@ -85,28 +93,105 @@ export default function LoginForm() {
       </div>
 
       {/* Card */}
-      <Card className="w-full max-w-md z-10 shadow-xl glass-effect border border-white/10 bg-[#0a0a0f]/80 backdrop-blur-xl text-white">
+      <Card className="w-full max-w-md z-10 shadow-xl border border-white/10 bg-[#0a0a0f]/80 backdrop-blur-xl text-white">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center gradient-text">Witamy w panelu logowania</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            {isLogin ? "Witamy z powrotem" : "Utwórz konto"}
+          </CardTitle>
           <CardDescription className="text-center text-gray-400">
-            Jeśli jesteś pracownikiem Vape Me — zaloguj się
+            {isLogin 
+              ? "Zaloguj się do swojego konta" 
+              : "Zarejestruj się aby rozpocząć"}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
           {errorMessage && (
-            <Alert variant="destructive" className="mb-4 bg-red-900/40 border-red-800 text-red-200">
+            <Alert className="mb-4 bg-red-900/40 border-red-800 text-red-200">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           )}
 
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-300">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="twoj@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-gray-300">Hasło</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500 focus:ring-purple-500 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-gray-300">Potwierdź hasło</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500 focus:ring-purple-500 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <Button
+              onClick={handleSubmit}
+              className="w-full h-12 relative overflow-hidden group transition-all duration-300 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-medium"
+            >
+              {isLogin ? "Zaloguj się" : "Zarejestruj się"}
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-white/10" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[#0a0a0f]/80 px-2 text-gray-400">lub</span>
+            </div>
+          </div>
+
           <Button
+            type="button"
             variant="outline"
-            className="cursor-pointer w-full h-12 relative overflow-hidden group transition-all duration-300 border border-white/10 bg-white/5 text-white rounded-xl"
-            onClick={signInWithGoogle}
+            className="w-full h-12 relative overflow-hidden group transition-all duration-300 border border-white/10 bg-white/5 text-white rounded-xl hover:bg-white/10"
           >
-            <div className="absolute inset-0 w-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 transition-all duration-300 group-hover:w-full"></div>
             <div className="relative flex items-center justify-center gap-3">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -127,9 +212,20 @@ export default function LoginForm() {
                 />
                 <path fill="none" d="M1 1h22v22H1z" />
               </svg>
-              <span className="font-medium">Zaloguj się przez Google</span>
+              <span className="font-medium">Kontynuuj z Google</span>
             </div>
           </Button>
+
+          <div className="text-center text-sm text-gray-400">
+            {isLogin ? "Nie masz konta? " : "Masz już konto? "}
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+            >
+              {isLogin ? "Zarejestruj się" : "Zaloguj się"}
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>
