@@ -18,7 +18,7 @@ const OptimizedImage = memo(({
   priority = false, 
   width = 256, 
   height = 256,
-  className = "object-cover rounded-lg",
+  className = "object-fill rounded-lg",
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
 }: OptimizedImageProps) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null)
@@ -85,7 +85,7 @@ const OptimizedImage = memo(({
   }
 
   return (
-    <div ref={imgRef} className="relative w-full h-full">
+    <div ref={imgRef} className="relative w-full h-full flex items-center justify-center">
       {isLoading && (
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-pink-900/20 animate-pulse rounded-lg" />
       )}

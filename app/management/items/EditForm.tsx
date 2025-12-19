@@ -46,6 +46,9 @@ export default function EditForm({handleCloseFkc,showAlert,product}:params){
   const [newSpecValue, setNewSpecValue] = useState("")
   const imageRef = useRef<HTMLInputElement>(null)
   
+  useEffect(()=>{
+    localStorage.setItem("location",location)
+  },[location])
   const removeFeature = useCallback((index: number) => {
     setFeatures((prev) => prev.filter((_, i) => i !== index))
   }, [])
@@ -141,6 +144,8 @@ export default function EditForm({handleCloseFkc,showAlert,product}:params){
     }
   }
   useEffect(()=>{
+    const lokacja =localStorage.getItem("location") as "location1" | "location2" 
+    setLocation(lokacja?lokacja:"location1")
     if(product==null) return;
     setFormData(product)
     setFeatures(product.features || [])

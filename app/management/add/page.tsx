@@ -44,7 +44,6 @@ interface Alert {
   type: 'error' | 'success' | 'warning'
 }
 export const dynamic = 'force-dynamic'
-
 const initialForm: ProductForm = {
   id: 0,
   name: "",
@@ -366,7 +365,12 @@ export default function AddProductPage() {
       showAlert("Błąd dodawania produktu", "error");
     }
   };
+  useEffect(()=>{
+    localStorage.setItem("location",location)
+  },[location])
   useEffect(() => {
+    const lokacja =localStorage.getItem("location") as "location1" | "location2" 
+    setLocation(lokacja?lokacja:"location1")
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user?.email !== "malgorzatamagryso2.pl@gmail.com"&&user?.email!=="vape.me_rzeszow@op.pl") {
         window.location.href = "/"
@@ -378,6 +382,9 @@ export default function AddProductPage() {
     function handleClickOutside(event: MouseEvent) {
       if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
         setFocused(false);
+      }
+      if (brandInputRef.current && !brandInputRef.current.contains(event.target as Node)) {
+        setBrandFocused(false);
       }
     }
    

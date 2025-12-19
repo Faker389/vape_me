@@ -40,16 +40,14 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
   }
   export default function TransactionPage() {
     const [mounted, setMounted] = useState(false);
-    useEffect(() => {
-      setMounted(true);
-    }, []);
   
     const [userScanned, setUserScanned] = useState<string|null>(null)
     const [searchQuery, setSearchQuery] =useState<string>("")
     const [scannedItems, setScannedItems] = useState<ScannedItem[]>([])
     const [scannedCoupons, setscannedCoupons] = useState<ScannedCoupon[]>([])
     const { products, listenToProducts } = useProductsStore()
-    const currentLocation = useRef<string>("location1")
+    const lokacja =localStorage.getItem("location") as "location1" | "location2" 
+    const currentLocation = useRef<string>(lokacja?lokacja:"location1")
     const [alerts, setAlerts] = useState<Alert[]>([]) 
     const inputRef = useRef<HTMLInputElement>(null);
     const [focused,setFocused]=useState<boolean>(false)
@@ -321,6 +319,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
         }
     }
     useEffect(() => {
+      setMounted(true);
       function handleClickOutside(event: MouseEvent) {
         if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
           setFocused(false);
@@ -621,7 +620,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Lokalizacja w której dokonujesz zakupu:</label>
               <select
-                onChange={(e) => currentLocation.current = e.target.value}
+                onChange={(e) => ()=>{currentLocation.current = e.target.value;localStorage.setItem("location",e.target.value)}}
                 className="w-fit px-4 py-3 bg-gray-800/50 border mb-3 border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-500/50 transition-colors"
               >
                 <option value="location1">Dąbrowskiego</option>
