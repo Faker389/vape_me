@@ -46,8 +46,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
     const [scannedItems, setScannedItems] = useState<ScannedItem[]>([])
     const [scannedCoupons, setscannedCoupons] = useState<ScannedCoupon[]>([])
     const { products, listenToProducts } = useProductsStore()
-    const lokacja =localStorage.getItem("location") as "location1" | "location2" 
-    const currentLocation = useRef<string>(lokacja?lokacja:"location1")
+    const currentLocation = useRef<string>("location1")
     const [alerts, setAlerts] = useState<Alert[]>([]) 
     const inputRef = useRef<HTMLInputElement>(null);
     const [focused,setFocused]=useState<boolean>(false)
@@ -620,6 +619,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Lokalizacja w której dokonujesz zakupu:</label>
               <select
+                value={localStorage.getItem("location")?localStorage.getItem("location")!:"location1"}
                 onChange={(e) => ()=>{currentLocation.current = e.target.value;localStorage.setItem("location",e.target.value)}}
                 className="w-fit px-4 py-3 bg-gray-800/50 border mb-3 border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-500/50 transition-colors"
               >
