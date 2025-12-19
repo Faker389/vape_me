@@ -10,6 +10,7 @@ import type { ProductForm } from "@/lib/productModel"
 import { useProductsStore } from "@/lib/storage"
 import useOnlineStatus from "@/lib/hooks/useOnlineStatus"
 import EditForm from "./EditForm"
+import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
@@ -44,6 +45,9 @@ export default function ItemsManagementPage() {
   const [searchQuery, setSearchQuery] = useState<string>("")
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
   const [alerts, setAlerts] = useState<Alert[]>([])
+  useBarcodeScanner((code) => {
+    setSearchQuery(code)
+  })
   const showAlert = useCallback((message: string, type: "error" | "success" | "warning" = "error") => {
     const newAlert: Alert = {
       id: crypto.randomUUID(),
