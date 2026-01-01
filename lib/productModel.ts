@@ -1,5 +1,5 @@
 export interface ProductForm {
-    id: number
+    id: number|string
     name: string
     category: string
     brand: string

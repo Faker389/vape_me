@@ -22,7 +22,7 @@ type ProductFieldValue =
   | Record<string, string>
   | string[]
 interface productTemp{
-    id: number
+    id: number|string
     name: string
     category: string
     brand: string
@@ -47,7 +47,7 @@ export const dynamic = 'force-dynamic'
 const initialForm: ProductForm = {
   id: 0,
   name: "",
-  category: "",
+  category: "Grzałki i Kartridże",
   brand: "",
   price: 0, 
   isNew: false,
@@ -61,7 +61,7 @@ const initialForm: ProductForm = {
   features: null,
   specifications: null,
 }
-
+// oxva next lim - 35 i xlim      kartridz v-bar linvo force - 29,99
 export default function AddProductPage() {
   const [mounted, setMounted] = useState(false);
 
@@ -70,7 +70,7 @@ export default function AddProductPage() {
   }, []);
   const [formData, setFormData] = useState<ProductForm>(initialForm)
   const [success, setSuccess] = useState(false)
-  const [removeBG,setRemoveBG]=useState<boolean>(false)
+  const [removeBG,setRemoveBG]=useState<boolean>(true)
   const [location, setLocation] = useState<"location1" | "location2">("location1")
   const isNew = useRef<boolean>(true)
   const [features, setFeatures] = useState<string[]>([])
@@ -183,7 +183,7 @@ export default function AddProductPage() {
     setFormData({ ...formData, specifications: updatedSpecs })
   }
   const handleInputChange = (field: keyof productTemp, value: ProductFieldValue) => {
-    if (field === "id" && typeof value === "number") {
+    if (field === "id" && (typeof value === "number" || typeof value === "string")) {
       checkIfExists(value)
       return
     }
@@ -208,9 +208,9 @@ export default function AddProductPage() {
   }
 
 
-  async function checkIfExists(id: number){
+  async function checkIfExists(id: number|string){
     try {
-      const product = rawproducts.find(e => e.id === id)
+      const product = rawproducts.find(e => e.id == id)
       if (!product) {
         isNew.current = true
         setFormData({...formData,id})
@@ -263,7 +263,7 @@ export default function AddProductPage() {
     }
   }
 
-  async function updateProduct(productId: number, updatedData: Partial<ProductForm>) {
+  async function updateProduct(productId: string|number, updatedData: Partial<ProductForm>) {
     try {
       const productRef = doc(db, "products", productId.toString())
       let data ;
@@ -293,7 +293,6 @@ export default function AddProductPage() {
         });
         if (!res.ok) throw new Error("Image download failed");
         fileBlob = await res.blob();
-        console.log(fileBlob)
       } catch (e) {
         showAlert("Błąd pobierania zdjęcia", "error");
       }
@@ -333,12 +332,14 @@ export default function AddProductPage() {
     } else {
       imageUrl = "";
     }
-    console.log(imageUrl)
     return imageUrl
   }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+    if(formData.id==0){
+      showAlert("ID nie może być 0", "error");
+      return;
+    }
     try {
       let imageUrl="";
       if(formData.image.includes("https://firebasestorage.googleapis.com")&&formData.imageFile==undefined){
@@ -349,7 +350,6 @@ export default function AddProductPage() {
       // 4️⃣ Save product info
       const productData = { ...formData, image: imageUrl };
       delete productData.imageFile;
-  
       if (isNew.current) await addProduct(productData);
       else await updateProduct(productData.id, productData);
   
@@ -535,7 +535,7 @@ export default function AddProductPage() {
                 type="number"
                 required
                 value={Number.isNaN(formData.id)?0:formData.id}
-                onChange={(e) => handleInputChange("id", Number.isNaN(Number.parseInt(e.target.value))?0:Number.parseFloat(e.target.value.trim()))}
+                onChange={(e) => handleInputChange("id",  e.target.value.trim())}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
                 placeholder="Np. 6123"
               />

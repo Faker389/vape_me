@@ -90,13 +90,13 @@ export default function ItemsManagementPage() {
     if (!rawproducts) return []
 
     const query = debouncedSearchQuery.toLowerCase().trim()
-    if (!query) return rawproducts.slice(0, 50)
+    if (!query) return rawproducts.slice(0, 100)
 
     return rawproducts
       .filter((e) => {
         return e.id.toString().includes(query) || e.name.toLowerCase().includes(query)
       })
-      .slice(0, 50)
+      .slice(0, 100)
   }, [rawproducts, debouncedSearchQuery])
 
   useEffect(() => {
