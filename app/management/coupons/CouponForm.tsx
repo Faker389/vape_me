@@ -56,7 +56,6 @@ const selectedForm = {
   store2quantity: 0,
   description: "",
 }
-
 export default function CouponForm({ fkc }: { fkc: (e: string,e2:"error" | "success" | "warning") => void }) {
   const [selectedProduct, setSelectedProduct] = useState<ProductForm>(selectedForm)
   const [isSubmitting, setIsSubmitting] = useState(false)

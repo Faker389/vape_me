@@ -183,7 +183,7 @@ export default function AddProductPage() {
     setFormData({ ...formData, specifications: updatedSpecs })
   }
   const handleInputChange = (field: keyof productTemp, value: ProductFieldValue) => {
-    if (field === "id" && (typeof value === "number" || typeof value === "string")) {
+    if (field === "id" && (typeof value === "number")) {
       checkIfExists(value)
       return
     }
@@ -208,7 +208,7 @@ export default function AddProductPage() {
   }
 
 
-  async function checkIfExists(id: number|string){
+  async function checkIfExists(id: number){
     try {
       const product = rawproducts.find(e => e.id == id)
       if (!product) {
@@ -535,7 +535,7 @@ export default function AddProductPage() {
                 type="number"
                 required
                 value={Number.isNaN(formData.id)?0:formData.id}
-                onChange={(e) => handleInputChange("id",  e.target.value.trim())}
+                onChange={(e) => handleInputChange("id",  parseInt(e.target.value.trim()))}
                 className="w-full px-4 py-3 bg-gray-800/50 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
                 placeholder="Np. 6123"
               />
