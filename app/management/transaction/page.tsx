@@ -4,7 +4,7 @@
   import { AnimatePresence, motion } from "framer-motion"
   import Link from "next/link"
   import Image from "next/image"
-  import { ArrowLeft, CheckCircle, XCircle, ShoppingCart, Tag, CreditCard, X, AlertCircle, Plus } from "lucide-react"
+  import { ArrowLeft, CheckCircle, XCircle, ShoppingCart, Tag, CreditCard, X, AlertCircle, Plus, Loader2 } from "lucide-react"
   import { auth, currentDate, db, getCurrentUser, transactions } from "@/lib/firebase"
   import { useBarcodeScanner } from "@/lib/hooks/useBarcodeScanner"
   import { arrayUnion, collection, doc, getDoc, getDocs, where, increment, query, updateDoc, writeBatch, onSnapshot } from "firebase/firestore"
@@ -50,6 +50,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
     const [alerts, setAlerts] = useState<Alert[]>([]) 
     const inputRef = useRef<HTMLInputElement>(null);
     const [focused,setFocused]=useState<boolean>(false)
+    const [isLoading,setIsLoading]=useState<boolean>(false)
     const showAlert = (message: string, type: 'error' | 'success' | 'warning' = 'error') => {
       const newAlert: Alert = {
         id: crypto.randomUUID(),
@@ -75,7 +76,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
               id: data.id,
               name: data.name ?? "",
               price: Number(data.price ?? 0),
-              points: parseInt((Number(data.price ?? 0)).toString()) * 2,
+              points: parseInt((Number(data.price ?? 0)).toString()),
               image: data.image ?? "",
             }])
         }
@@ -290,8 +291,9 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
       }
     }
     const handleFinishTransaction = async() => {
+      if(isLoading||!isOnline) return;
+      setIsLoading(true)
       const resp1 = await updateProductsQuantity()
-      console.log(resp1)
         if(resp1&&userScanned==null){
           showAlert("Transakcja zakończona pomyślnie!", "success")
           setTimeout(() => {
@@ -316,6 +318,7 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
             setscannedCoupons([])
           }, 1000)
         }
+        setIsLoading(false)
     }
     useEffect(() => {
       setMounted(true);
@@ -652,10 +655,10 @@ import {  UserCoupon, UserModel } from "@/lib/userModel"
             transition={{ delay: 0.5 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={isOnline?handleFinishTransaction:()=>{}}
+            onClick={handleFinishTransaction}
             className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-          Zakończ transakcję
+          {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Zakończ transakcję"}
           </motion.button>
           <AnimatePresence>
     {!isOnline && (
