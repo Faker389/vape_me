@@ -1,5 +1,6 @@
 "use client"
 
+import Navbar from "@/components/Navbar"
 import { motion } from "framer-motion"
 
 const Privacy = () => {
@@ -12,6 +13,7 @@ const Privacy = () => {
         <div className="absolute bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-pink-600/20 blur-[150px] rounded-full"/>
       </div>
 
+      <Navbar />
 
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-6">
