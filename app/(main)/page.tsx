@@ -355,8 +355,8 @@ export default function Home() {
               <h4 className="font-bold mb-4">Firma</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li>
-                  <Link href="#" className="hover:text-white transition-colors">
-                    O Nas
+                  <Link href="/policy" className="hover:text-white transition-colors">
+                    Polityka prywatności
                   </Link>
                 </li>
                 <li>
@@ -365,7 +365,7 @@ export default function Home() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-white transition-colors">
+                  <Link href="/terms" className="hover:text-white transition-colors">
                     Regulamin
                   </Link>
                 </li>
@@ -458,13 +458,7 @@ const InfiniteScrollSection = ({
   const totalWidth = cardWidth * (products.length > 0 ? products.length : 1)
   
   // Demo products if none provided
-  const demoProducts = products.length > 0 ? products : [
-    { id: 1, name: "Product 1", description: "Amazing quality", price: 99.99, image: "🎮" },
-    { id: 2, name: "Product 2", description: "Best seller", price: 129.99, image: "🎧" },
-    { id: 3, name: "Product 3", description: "New arrival", price: 149.99, image: "⌚" },
-    { id: 4, name: "Product 4", description: "Premium item", price: 199.99, image: "📱" },
-    { id: 5, name: "Product 5", description: "Top rated", price: 89.99, image: "🎮" }
-  ]
+
 
   // Auto-scroll animation
   useEffect(() => {
@@ -522,12 +516,6 @@ const InfiniteScrollSection = ({
   const handleDragEnd = useCallback(() => {
     setIsPaused(false)
   }, [])
-
-  const manualScroll = useCallback((direction: 'prev' | 'next') => {
-    handlePause()
-    const moveAmount = cardWidth * (direction === 'next' ? -1 : 1)
-    x.set(x.get() + moveAmount)
-  }, [x, cardWidth, handlePause])
 
   return (
     <section className="pb-20 relative overflow-hidden">
